@@ -20,7 +20,9 @@ class EditorList(QWidget):
         for i in range(len(targetList)):
             name = str(i)
 
-            editor = editorGenerator.createWidget(targetList[i], None, name)
+            setter = lambda val, thisI=i: self._setListElem(targetList, thisI, val)
+
+            editor = editorGenerator.createWidget(targetList[i], name, setter)
             editor.dataChanged.connect(self._dataChanged)
 
             if hasattr(editor, "shouldSkipLabel") and editor.shouldSkipLabel:
@@ -41,3 +43,8 @@ class EditorList(QWidget):
 
     def _dataChanged(self):
         self.dataChanged.emit()
+
+    # This is a replacement for this, which isn't valid:
+    #  setter = lambda val, thisI=i: targetList[thisI] = val
+    def _setListElem(self, targetList, i, val):
+        targetList[i] = val

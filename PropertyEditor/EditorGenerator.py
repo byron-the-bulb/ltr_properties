@@ -14,7 +14,7 @@ class EditorGenerator(object):
         self._spinBoxWidth = spinBoxWidth
         pass
 
-    def createWidget(self, value, targetObject = None, name = None):
+    def createWidget(self, value, name = None, changeCallback = None):
         valType = type(value)
 
         # This set if elifs will either return a widget, or set this to a widget
@@ -37,6 +37,6 @@ class EditorGenerator(object):
         else:
             return QLabel(str(valType) + " is not implemented. If it is a custom class, you need to use __slots__.")
 
-        if targetObject and name:
-            valueEditor.dataChanged.connect(lambda val: setattr(targetObject, name, val))
+        if changeCallback:
+            valueEditor.dataChanged.connect(lambda val: changeCallback(val))
         return valueEditor

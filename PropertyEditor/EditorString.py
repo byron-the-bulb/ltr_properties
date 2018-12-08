@@ -9,7 +9,11 @@ class EditorString(QLineEdit):
 
         self.setText(value)
 
+        self._oldValue = value
+
         self.editingFinished.connect(self._dataChanged)
 
     def _dataChanged(self):
-        self.dataChanged.emit(self.text())
+        if self._oldValue != self.text():
+            self.dataChanged.emit(self.text())
+            self._oldValue = self.text()

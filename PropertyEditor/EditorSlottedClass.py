@@ -21,7 +21,9 @@ class EditorSlottedClass(QWidget):
 
     def _createWidgetsForObject(self, boxLayout, editorGenerator, targetObject, labelWidth):
         for name in targetObject.__slots__:
-            editor = editorGenerator.createWidget(getattr(targetObject, name), targetObject, name)
+            setter = lambda val, thisName=name: setattr(targetObject, thisName, val)
+            
+            editor = editorGenerator.createWidget(getattr(targetObject, name), name, setter)
             editor.dataChanged.connect(self._dataChanged)
 
             if hasattr(editor, "shouldSkipLabel") and editor.shouldSkipLabel:

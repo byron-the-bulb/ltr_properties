@@ -18,8 +18,10 @@ class EditorDict(QWidget):
 
     def _createWidgetsForDict(self, boxLayout, editorGenerator, targetDict, labelWidth):
         for name, value in targetDict.items():
-            editor = editorGenerator.createWidget(value, None, name)
-            editor.dataChanged.connect(lambda newVal: self._dataChanged(targetDict, name, newVal))
+            setter = lambda val, thisName=name: self._setDictElem(targetDict, thisName, val)
+
+            editor = editorGenerator.createWidget(value, name, setter)
+            editor.dataChanged.connect(lambda newVal: self._dataChanged())
 
             if hasattr(editor, "shouldSkipLabel") and editor.shouldSkipLabel:
                 boxLayout.addWidget(editor)
@@ -37,6 +39,10 @@ class EditorDict(QWidget):
 
                 boxLayout.addWidget(holder)
 
-    def _dataChanged(self, targetDict, name, newVal):
-        targetDict[name] = newVal
+    def _dataChanged(self):
         self.dataChanged.emit()
+
+    # This is a replacement for this, which isn't valid:
+    #  setter = lambda val, thisI=i: targetDict[thisName] = val
+    def _setDictElem(self, targetDict, name, val):
+        targetDict[name] = val
