@@ -8,7 +8,6 @@ class EditorList(QWidget):
     def __init__(self, editorGenerator, targetObject, name, labelWidth):
         super().__init__()
 
-        layout = None
         selfLayout = QVBoxLayout(self)
         box = QGroupBox(name)
         selfLayout.addWidget(box)

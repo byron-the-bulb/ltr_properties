@@ -1,7 +1,4 @@
-#!/usr/bin/python3
-
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
-
 from PyQt5.QtCore import pyqtSignal
 
 from .EditorGenerator import EditorGenerator

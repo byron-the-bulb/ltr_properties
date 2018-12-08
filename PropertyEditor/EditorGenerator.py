@@ -20,16 +20,14 @@ class EditorGenerator(object):
         # This set if elifs will either return a widget, or set this to a widget
         # that should then be connected to a setattr lambda to store the value.
         valueEditor = None
-        if hasattr(value, "__slots__"):
-            if name:
-                name = name + " (" + valType.__name__ + ")"
-            return EditorSlottedClass(self, value, name, self._labelWidth)
-        elif valType == int:
+        if valType == int:
             valueEditor = EditorInt(value, self._spinBoxWidth)
         elif valType == float:
             valueEditor = EditorFloat(value, self._spinBoxWidth)
         elif valType == str:
             valueEditor = EditorString(value)
+        elif hasattr(value, "__slots__"):
+            return EditorSlottedClass(self, value, name, self._labelWidth)
         elif valType == list:
             return EditorList(self, value, name, self._labelWidth)
         elif valType == dict:
