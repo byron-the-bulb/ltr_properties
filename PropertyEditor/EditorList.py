@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QLabel, QGroupBox, QHBoxLayout, QVBoxLayout
 from PyQt5.QtCore import pyqtSignal
 
 class EditorList(QWidget):
-    dataChanged = pyqtSignal()
+    dataChanged = pyqtSignal(list)
     shouldSkipLabel = True
 
     def __init__(self, editorGenerator, targetObject, name, labelWidth):
@@ -12,6 +12,10 @@ class EditorList(QWidget):
         box = QGroupBox(name)
         selfLayout.addWidget(box)
         layout = QVBoxLayout(box)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        self._targetObject = targetObject
         
         self._createWidgetsForList(layout, editorGenerator, targetObject, labelWidth)
 
@@ -41,7 +45,7 @@ class EditorList(QWidget):
                 boxLayout.addWidget(holder)
 
     def _dataChanged(self):
-        self.dataChanged.emit()
+        self.dataChanged.emit(self._targetObject)
 
     # This is a replacement for this, which isn't valid:
     #  setter = lambda val, thisI=i: targetList[thisI] = val

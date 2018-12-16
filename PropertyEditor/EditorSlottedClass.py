@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QWidget, QLabel, QGroupBox, QHBoxLayout, QVBoxLayout
 from PyQt5.QtCore import pyqtSignal
 
 class EditorSlottedClass(QWidget):
-    dataChanged = pyqtSignal()
+    dataChanged = pyqtSignal(object)
     shouldSkipLabel = True
 
     def __init__(self, editorGenerator, targetObject, name, labelWidth):
@@ -11,16 +11,26 @@ class EditorSlottedClass(QWidget):
         layout = None
         if (name):
             selfLayout = QVBoxLayout(self)
+            selfLayout.setContentsMargins(0, 0, 0, 0)
             box = QGroupBox(name)
             selfLayout.addWidget(box)
             layout = QVBoxLayout(box)
         else:
             layout = QVBoxLayout(self)
         
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        self._targetObject = targetObject
+        
         self._createWidgetsForObject(layout, editorGenerator, targetObject, labelWidth)
 
     def _createWidgetsForObject(self, boxLayout, editorGenerator, targetObject, labelWidth):
         for name in targetObject.__slots__:
+            # Let users add __dict__ to enable runtime-only data.
+            if name == "__dict__":
+                continue
+                
             setter = lambda val, thisName=name: setattr(targetObject, thisName, val)
             
             editor = editorGenerator.createWidget(getattr(targetObject, name), name, setter)
@@ -43,4 +53,4 @@ class EditorSlottedClass(QWidget):
                 boxLayout.addWidget(holder)
 
     def _dataChanged(self):
-        self.dataChanged.emit()
+        self.dataChanged.emit(self._targetObject)

@@ -1,9 +1,23 @@
 #!/usr/bin/python3
 
 from PropertyEditor.PropertyEditorWidget import PropertyEditorWidget
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout
+from PropertyEditor.EditorColor import EditorColor
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QScrollArea
 import sys
 import jsonpickle
+
+class Color(object):
+    __slots__ = "r", "g", "b"
+    def __init__(self, r, g, b):
+        self.setRgb(r, g, b)
+    
+    def getRgb(self):
+        return self.r, self.g, self.b
+
+    def setRgb(self, r, g, b):
+        self.r = r
+        self.g = g
+        self.b = b
 
 class Baz(object):
     __slots__ = "x"
@@ -15,7 +29,7 @@ class Bar(object):
     def __init__(self):
         self.a = {"one": "a", "two": "b"}
         self.b = "two"
-        self.c = "three four five"
+        self.c = Color(0, 150, 255)
         self.d = Baz()
 
 class Foo(object):
@@ -34,19 +48,21 @@ def onDataChanged(obj):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    mainWidget = QWidget()
+    mainWidget = QScrollArea()
     mainLayout = QVBoxLayout(mainWidget)
+    mainLayout.setContentsMargins(0, 0, 0, 0)
 
     foo = Foo()
 
     pe = PropertyEditorWidget()
+    pe.registerCustomEditor(Color, EditorColor)
     pe.setTargetObject(foo)
 
     pe.dataChanged.connect(lambda: onDataChanged(foo))
 
-    mainLayout.addWidget(pe)
+    mainWidget.setWidget(pe)
 
-    mainWidget.setGeometry(300, 300, 600, 600)
+    mainWidget.setGeometry(300, 200, 600, 900)
     mainWidget.setWindowTitle('LtRandolph Property Editor')
     mainWidget.show()
     app.exec_()

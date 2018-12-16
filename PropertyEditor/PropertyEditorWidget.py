@@ -17,11 +17,17 @@ class PropertyEditorWidget(QWidget):
         self._spinBoxWidth = 70
 
         self._targetObject = None
+
+        self._customEditors = {}
            
         QVBoxLayout(self)
+        self.layout().setContentsMargins(0, 0, 0, 0)
 
     def labelWidth(self):
         return self._labelWidth
+
+    def registerCustomEditor(self, classObj, editorClass):
+        self._customEditors[classObj] = editorClass
 
     def setLabelWidth(self, width):
         self._labelWidth = width
@@ -48,7 +54,7 @@ class PropertyEditorWidget(QWidget):
         clearLayout(self.layout())
 
         if self._targetObject:
-            editorGenerator = EditorGenerator(self._labelWidth, self._spinBoxWidth)
+            editorGenerator = EditorGenerator(self._customEditors, self._labelWidth, self._spinBoxWidth)
             editor = editorGenerator.createWidget(self._targetObject)
             editor.dataChanged.connect(self._dataChanged)
             self.layout().addWidget(editor)
