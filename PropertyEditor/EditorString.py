@@ -4,7 +4,7 @@ from PyQt5.QtCore import pyqtSignal
 class EditorString(QLineEdit):
     dataChanged = pyqtSignal(str)
 
-    def __init__(self, value):
+    def __init__(self, editorGenerator, value, name):
         super().__init__()
 
         self.setText(value)

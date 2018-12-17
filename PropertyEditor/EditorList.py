@@ -1,25 +1,20 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QGroupBox, QHBoxLayout, QVBoxLayout
 from PyQt5.QtCore import pyqtSignal
 
-class EditorList(QWidget):
+class __EditorListBase(QWidget):
     dataChanged = pyqtSignal(list)
     shouldSkipLabel = True
 
-    def __init__(self, editorGenerator, targetObject, name, labelWidth):
+    def __init__(self, editorGenerator, targetObject, name):
         super().__init__()
 
-        selfLayout = QVBoxLayout(self)
-        box = QGroupBox(name)
-        selfLayout.addWidget(box)
-        layout = QVBoxLayout(box)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
+        layout = self._createLayout(name)
 
         self._targetObject = targetObject
         
-        self._createWidgetsForList(layout, editorGenerator, targetObject, labelWidth)
+        self._createWidgetsForList(layout, editorGenerator, targetObject)
 
-    def _createWidgetsForList(self, boxLayout, editorGenerator, targetList, labelWidth):
+    def _createWidgetsForList(self, boxLayout, editorGenerator, targetList):
         for i in range(len(targetList)):
             name = str(i)
 
@@ -28,21 +23,7 @@ class EditorList(QWidget):
             editor = editorGenerator.createWidget(targetList[i], name, setter)
             editor.dataChanged.connect(self._dataChanged)
 
-            if hasattr(editor, "shouldSkipLabel") and editor.shouldSkipLabel:
-                boxLayout.addWidget(editor)
-            else:
-                holder = QWidget()
-                layout = QHBoxLayout(holder)
-
-                label = QLabel(name)
-                label.setFixedWidth(labelWidth)
-                layout.addWidget(label)
-
-                layout.addWidget(editor)
-
-                layout.addStretch()
-
-                boxLayout.addWidget(holder)
+            self._addEditorToLayout(editorGenerator, boxLayout, name, editor)
 
     def _dataChanged(self):
         self.dataChanged.emit(self._targetObject)
@@ -51,3 +32,42 @@ class EditorList(QWidget):
     #  setter = lambda val, thisI=i: targetList[thisI] = val
     def _setListElem(self, targetList, i, val):
         targetList[i] = val
+
+class EditorList(__EditorListBase):
+    def __init__(self, editorGenerator, targetObject, name):
+        super().__init__(editorGenerator, targetObject, name)
+
+    def _createLayout(self, name):
+        selfLayout = QVBoxLayout(self)
+        box = QGroupBox(name)
+        selfLayout.addWidget(box)
+        layout = QVBoxLayout(box)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        return layout
+
+    def _addEditorToLayout(self, editorGenerator, boxLayout, name, editor):
+        if hasattr(editor, "shouldSkipLabel") and editor.shouldSkipLabel:
+            boxLayout.addWidget(editor)
+        else:
+            boxLayout.addWidget(editorGenerator.wrapWidgetWithLabel(name, editor))
+
+class EditorListHorizontal(__EditorListBase):
+    def __init__(self, editorGenerator, targetObject, name):
+        super().__init__(editorGenerator, targetObject, name)
+
+    def _createLayout(self, name):
+        selfLayout = QVBoxLayout(self)
+        box = QGroupBox(name)
+        selfLayout.addWidget(box)
+        layout = QHBoxLayout(box)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        return layout
+
+    def _addEditorToLayout(self, editorGenerator, boxLayout, name, editor):
+        if hasattr(editor, "shouldSkipLabel") and editor.shouldSkipLabel:
+            boxLayout.addWidget(editor)
+        else:
+            boxLayout.addWidget(QLabel(name))
+            boxLayout.addWidget(editor)

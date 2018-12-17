@@ -4,10 +4,10 @@ from PyQt5.QtCore import pyqtSignal
 class EditorFloat(QDoubleSpinBox):
     dataChanged = pyqtSignal(float)
 
-    def __init__(self, value, spinBoxWidth):
+    def __init__(self, editorGenerator, value, name):
         super().__init__()
 
-        self.setFixedWidth(spinBoxWidth)
+        self.setFixedWidth(editorGenerator.getSpinBoxWidth())
         self.setValue(value)
 
         self.valueChanged.connect(self._dataChanged)

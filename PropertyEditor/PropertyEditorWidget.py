@@ -56,7 +56,8 @@ class PropertyEditorWidget(QWidget):
         if self._targetObject:
             editorGenerator = EditorGenerator(self._customEditors, self._labelWidth, self._spinBoxWidth)
             editor = editorGenerator.createWidget(self._targetObject)
-            editor.dataChanged.connect(self._dataChanged)
+            if hasattr(editor, "dataChanged"):
+                editor.dataChanged.connect(self._dataChanged)
             self.layout().addWidget(editor)
 
             self.layout().addStretch()

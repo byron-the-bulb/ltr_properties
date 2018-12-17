@@ -1,5 +1,5 @@
 
-from PyQt5.QtWidgets import QWidget, QLabel
+from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout
 
 from .EditorDict import EditorDict
 from .EditorFloat import EditorFloat
@@ -22,22 +22,42 @@ class EditorGenerator(object):
         # that should then be connected to a setattr lambda to store the value.
         valueEditor = None
         if valType in self._customEditors:
-            return self._customEditors[valType](value)
+            return self._customEditors[valType](self, value, name)
         elif valType == int:
-            valueEditor = EditorInt(value, self._spinBoxWidth)
+            valueEditor = EditorInt(self, value, name)
         elif valType == float:
-            valueEditor = EditorFloat(value, self._spinBoxWidth)
+            valueEditor = EditorFloat(self, value, name)
         elif valType == str:
-            valueEditor = EditorString(value)
+            valueEditor = EditorString(self, value, name)
         elif hasattr(value, "__slots__"):
-            valueEditor = EditorSlottedClass(self, value, name, self._labelWidth)
+            valueEditor = EditorSlottedClass(self, value, name)
         elif valType == list:
-            valueEditor = EditorList(self, value, name, self._labelWidth)
+            valueEditor = EditorList(self, value, name)
         elif valType == dict:
-            valueEditor = EditorDict(self, value, name, self._labelWidth)
+            valueEditor = EditorDict(self, value, name)
         else:
-            return QLabel(str(valType) + " is not implemented. If it is a custom class, you need to use __slots__.")
+            return QLabel(str(valType) + " is not implemented.\nIf it is a custom class, you need to use __slots__.")
 
         if changeCallback:
             valueEditor.dataChanged.connect(lambda val: changeCallback(val))
         return valueEditor
+
+    def getLabelWidth(self):
+        return self._labelWidth
+
+    def getSpinBoxWidth(self):
+        return self._spinBoxWidth
+
+    def wrapWidgetWithLabel(self, name, editor):
+        holder = QWidget()
+        layout = QHBoxLayout(holder)
+
+        label = QLabel(name)
+        label.setFixedWidth(self._labelWidth)
+        layout.addWidget(label)
+
+        layout.addWidget(editor)
+
+        layout.addStretch()
+
+        return holder

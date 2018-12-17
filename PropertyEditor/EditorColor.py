@@ -8,7 +8,7 @@ from PyQt5.Qt import QColor
 class EditorColor(QPushButton):
     dataChanged = pyqtSignal(object)
 
-    def __init__(self, value):
+    def __init__(self, editorGenerator, value, name):
         super().__init__()
 
         self._value = value
@@ -22,7 +22,7 @@ class EditorColor(QPushButton):
         dialog.setOption(QColorDialog.DontUseNativeDialog)
         dialog.setStyleSheet("")
         if dialog.exec() == QColorDialog.Accepted:
-            newR, newG, newB, newA = dialog.currentColor().getRgb()
+            newR, newG, newB, dummy = dialog.currentColor().getRgb()
             if [newR, newG, newB] != [r, g, b]:
                 self._value.setRgb(newR, newG, newB)
                 self.dataChanged.emit(self._value)
