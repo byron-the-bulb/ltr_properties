@@ -3,13 +3,16 @@
 from PropertyEditor.PropertyEditorWidget import PropertyEditorWidget
 from PropertyEditor.EditorColor import EditorColor
 from PropertyEditor.EditorSlottedClass import EditorSlottedClassHorizontal
+from PropertyEditor.Serializer import Serializer
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QScrollArea
 import sys
 import jsonpickle
 
+filename = "mainOutput.json"
+
 class Color():
     __slots__ = "r", "g", "b"
-    def __init__(self, r, g, b):
+    def __init__(self, r=0, g=0, b=0):
         self.setRgb(r, g, b)
     
     def getRgb(self):
@@ -22,7 +25,7 @@ class Color():
 
 class Vector():
     __slots__ = "x", "y", "z"
-    def __init__(self, x, y, z):
+    def __init__(self, x=0, y=0, z=0):
         self.x = x
         self.y = y
         self.z = z
@@ -51,24 +54,30 @@ class Foo(object):
         self.b = Bar()
         self.v = Vector(1, 4, 9)
 
-def onDataChanged(obj):
-    print(jsonpickle.dumps(obj))
+def onDataChanged(obj, s):
+    s.save(filename, obj)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+
+    s = Serializer(sys.modules[__name__])
 
     mainWidget = QScrollArea()
     mainLayout = QVBoxLayout(mainWidget)
     mainLayout.setContentsMargins(0, 0, 0, 0)
 
-    foo = Foo()
+    foo = None
+    try:
+        foo = s.load(filename)
+    except:
+        foo = Foo()
 
     pe = PropertyEditorWidget()
     pe.registerCustomEditor(Color, EditorColor)
     pe.registerCustomEditor(Vector, EditorSlottedClassHorizontal)
     pe.setTargetObject(foo)
 
-    pe.dataChanged.connect(lambda: onDataChanged(foo))
+    pe.dataChanged.connect(lambda: onDataChanged(foo, s))
 
     mainWidget.setWidget(pe)
 
