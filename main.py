@@ -10,10 +10,19 @@ import jsonpickle
 
 filename = "mainOutput.json"
 
+def printLoadedClass(obj):
+    classDesc = type(obj).__name__ + ":"
+    for slot in obj.__slots__:
+        classDesc += " " + slot + "=" + str(getattr(obj, slot))
+    print("Loaded " + classDesc)
+
 class Color():
     __slots__ = "r", "g", "b"
     def __init__(self, r=0, g=0, b=0):
         self.setRgb(r, g, b)
+
+    def postLoad(self):
+        printLoadedClass(self)
     
     def getRgb(self):
         return self.r, self.g, self.b
@@ -30,10 +39,16 @@ class Vector():
         self.y = y
         self.z = z
 
+    def postLoad(self):
+        printLoadedClass(self)
+
 class Baz():
     __slots__ = "x"
     def __init__(self):
         self.x = 10000
+
+    def postLoad(self):
+        printLoadedClass(self)
 
 class Bar(object):
     __slots__ = "a", "b", "c", "d"
@@ -42,6 +57,9 @@ class Bar(object):
         self.b = "two"
         self.c = Color(0, 150, 255)
         self.d = Baz()
+
+    def postLoad(self):
+        printLoadedClass(self)
 
 class Foo(object):
     __slots__ = "x", "y", "z", "w", "s", "b", "v"
@@ -53,6 +71,9 @@ class Foo(object):
         self.s = "test"
         self.b = Bar()
         self.v = Vector(1, 4, 9)
+
+    def postLoad(self):
+        printLoadedClass(self)
 
 def onDataChanged(obj, s):
     s.save(filename, obj)
