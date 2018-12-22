@@ -1,5 +1,5 @@
 import json
-import types
+import inspect
 
 class Serializer():
     # Recommend that you pass in "sys.modules[__name__]"
@@ -33,16 +33,11 @@ class Serializer():
                         contents[key] = getattr(o, key)
                 return { type(o).__name__ : contents }
 
-    def __decodeObjectHook(jsonObject, classList, postLoadMethod):
+    def __decodeObjectHook(jsonObject, nameList, postLoadMethod):
         if len(jsonObject) == 1:
             className = next(iter(jsonObject.keys()))
-            if hasattr(classList, className):
-                classType = getattr(classList, className)
-
-                # This may be a module, in which case we support getting the same-named class from it.
-                if isinstance(classType, types.ModuleType):
-                    classType = getattr(classType, className)
-
+            classType = Serializer.__getClassType(className, nameList)
+            if classType:
                 classObj = classType()
                 for k, v in jsonObject[className].items():
                     setattr(classObj, k, v)
@@ -51,3 +46,20 @@ class Serializer():
                 return classObj
         
         return jsonObject
+
+    def __getClassType(className, nameList):
+        # See if we find the class in this namespace.
+        if hasattr(nameList, className):
+            maybeClassType = getattr(nameList, className)
+            if inspect.isclass(maybeClassType):
+                return maybeClassType
+
+        # Otherwise, recurse into any modules we find.
+        for k, v in nameList.__dict__.items():
+            if inspect.ismodule(v):
+                maybeClassType = Serializer.__getClassType(className, v)
+                if maybeClassType:
+                    return maybeClassType
+
+        # No dice.
+        return None
