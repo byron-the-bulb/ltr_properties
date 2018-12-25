@@ -8,17 +8,17 @@ class Serializer():
             )
         return decoder.decode(jsonStr)
 
-    def encode(obj):
-        encoder = Serializer.__Encoder()
+    def encode(obj, indent=None):
+        encoder = Serializer.__Encoder(indent=indent)
         return encoder.encode(obj)
     
     def load(filename, module, postLoadMethod="postLoad"):
         with open(filename, 'r') as loadFile:
             return Serializer.decode(loadFile.read(), module, postLoadMethod)
 
-    def save(filename, obj):
+    def save(filename, obj, indent=None):
         with open(filename, 'w') as saveFile:
-            saveFile.write(Serializer.encode(obj))
+            saveFile.write(Serializer.encode(obj, indent))
 
     class __Encoder(json.JSONEncoder):
         def default(self, o):
