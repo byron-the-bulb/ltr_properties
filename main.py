@@ -81,15 +81,14 @@ def onDataChanged(obj, s):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    s = Serializer(sys.modules[__name__])
-
     mainWidget = QScrollArea()
     mainLayout = QVBoxLayout(mainWidget)
     mainLayout.setContentsMargins(0, 0, 0, 0)
+    currentModule = sys.modules[__name__]
 
     foo = None
     try:
-        foo = s.load(filename)
+        foo = Serializer.load(filename, currentModule)
     except:
         foo = Foo()
 

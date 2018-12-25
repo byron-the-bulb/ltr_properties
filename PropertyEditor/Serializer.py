@@ -2,27 +2,23 @@ import json
 import inspect
 
 class Serializer():
-    # Recommend that you pass in "sys.modules[__name__]"
-    # from some file that has all the classes you care about imported.
-    def __init__(self, sysModulesName, postLoadMethod="postLoad"):
-        self._encoder = Serializer.__Encoder(indent=2)
-        self._decoder = json.JSONDecoder(
-            object_hook=lambda jsonObject: Serializer.__decodeObjectHook(jsonObject, sysModulesName, postLoadMethod)
+    def decode(jsonStr, module, postLoadMethod="postLoad"):
+        decoder = json.JSONDecoder(
+            object_hook=lambda jsonObject: Serializer.__decodeObjectHook(jsonObject, module, postLoadMethod)
             )
+        return decoder.decode(jsonStr)
 
-    def decode(self, jsonStr):
-        return self._decoder.decode(jsonStr)
-
-    def encode(self, obj):
-        return self._encoder.encode(obj)
+    def encode(obj):
+        encoder = __Encoder()
+        return encoder.encode(obj)
     
-    def load(self, filename):
+    def load(filename, module, postLoadMethod="postLoad"):
         with open(filename, 'r') as loadFile:
-            return self.decode(loadFile.read())
+            return Serializer.decode(loadFile.read(), module, postLoadMethod)
 
-    def save(self, filename, obj):
+    def save(filename, obj):
         with open(filename, 'w') as saveFile:
-            saveFile.write(self.encode(obj))
+            saveFile.write(Serializer.encode(obj))
 
     class __Encoder(json.JSONEncoder):
         def default(self, o):
@@ -33,10 +29,11 @@ class Serializer():
                         contents[key] = getattr(o, key)
                 return { type(o).__name__ : contents }
 
-    def __decodeObjectHook(jsonObject, nameList, postLoadMethod):
+    def __decodeObjectHook(jsonObject, module, postLoadMethod):
         if len(jsonObject) == 1:
             className = next(iter(jsonObject.keys()))
-            classType = Serializer.__getClassType(className, nameList)
+            checkedModules = []
+            classType = Serializer.__getClassType(className, module, checkedModules)
             if classType:
                 classObj = classType()
                 for k, v in jsonObject[className].items():
@@ -47,17 +44,18 @@ class Serializer():
         
         return jsonObject
 
-    def __getClassType(className, nameList):
+    def __getClassType(className, module, checkedModules):
         # See if we find the class in this namespace.
-        if hasattr(nameList, className):
-            maybeClassType = getattr(nameList, className)
+        if hasattr(module, className):
+            maybeClassType = getattr(module, className)
             if inspect.isclass(maybeClassType):
                 return maybeClassType
 
         # Otherwise, recurse into any modules we find.
-        for k, v in nameList.__dict__.items():
-            if inspect.ismodule(v) and not k.startswith("_"):
-                maybeClassType = Serializer.__getClassType(className, v)
+        for k, v in module.__dict__.items():
+            if inspect.ismodule(v) and not k.startswith("_") and not k in checkedModules:
+                checkedModules.append(k)
+                maybeClassType = Serializer.__getClassType(className, v, checkedModules)
                 if maybeClassType:
                     return maybeClassType
 
