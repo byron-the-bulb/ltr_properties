@@ -65,9 +65,9 @@ class Foo(object):
     __slots__ = "x", "y", "z", "w", "s", "b", "v"
     def __init__(self):
         self.x = 0
-        self.y = -25
+        self.y = -25.1
         self.z = [-100, 20, 3]
-        self.w = 0.1
+        self.w = True
         self.s = "test"
         self.b = Bar()
         self.v = Vector(1, 4, 9)
@@ -75,8 +75,8 @@ class Foo(object):
     def postLoad(self):
         printLoadedClass(self)
 
-def onDataChanged(obj, s):
-    s.save(filename, obj)
+def onDataChanged(obj):
+    Serializer.save(filename, obj)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     pe.registerCustomEditor(Vector, EditorSlottedClassHorizontal)
     pe.setTargetObject(foo)
 
-    pe.dataChanged.connect(lambda: onDataChanged(foo, s))
+    pe.dataChanged.connect(lambda: onDataChanged(foo))
 
     mainWidget.setWidget(pe)
 

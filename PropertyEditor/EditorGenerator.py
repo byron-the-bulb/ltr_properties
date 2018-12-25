@@ -1,6 +1,7 @@
 
 from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout
 
+from .EditorBool import EditorBool
 from .EditorDict import EditorDict
 from .EditorFloat import EditorFloat
 from .EditorInt import EditorInt
@@ -23,6 +24,8 @@ class EditorGenerator(object):
         valueEditor = None
         if valType in self._customEditors:
             return self._customEditors[valType](self, value, name)
+        elif valType == bool:
+            valueEditor = EditorBool(self, value, name)
         elif valType == int:
             valueEditor = EditorInt(self, value, name)
         elif valType == float:

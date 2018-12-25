@@ -23,7 +23,8 @@ class __EditorSlottedClassBase(QWidget):
             setter = lambda val, thisName=name: setattr(targetObject, thisName, val)
             
             editor = editorGenerator.createWidget(getattr(targetObject, name), name, setter)
-            editor.dataChanged.connect(self._dataChanged)
+            if hasattr(editor, "dataChanged"):    
+                editor.dataChanged.connect(self._dataChanged)
 
             self._addEditorToLayout(editorGenerator, boxLayout, name, editor)
             

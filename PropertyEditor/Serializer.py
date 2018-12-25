@@ -9,7 +9,7 @@ class Serializer():
         return decoder.decode(jsonStr)
 
     def encode(obj):
-        encoder = __Encoder()
+        encoder = Serializer.__Encoder()
         return encoder.encode(obj)
     
     def load(filename, module, postLoadMethod="postLoad"):
