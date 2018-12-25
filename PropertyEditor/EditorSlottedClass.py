@@ -16,8 +16,8 @@ class __EditorSlottedClassBase(QWidget):
 
     def _createWidgetsForObject(self, boxLayout, editorGenerator, targetObject):
         for name in targetObject.__slots__:
-            # Let users add __dict__ to enable runtime-only data.
-            if name == "__dict__":
+            # Let users add hidden properties (including __dict__).
+            if name.startswith("_"):
                 continue
                 
             setter = lambda val, thisName=name: setattr(targetObject, thisName, val)

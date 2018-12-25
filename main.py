@@ -6,7 +6,6 @@ from PropertyEditor.EditorSlottedClass import EditorSlottedClassHorizontal
 from PropertyEditor.Serializer import Serializer
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QScrollArea
 import sys
-import jsonpickle
 
 filename = "mainOutput.json"
 
@@ -51,12 +50,13 @@ class Baz():
         printLoadedClass(self)
 
 class Bar(object):
-    __slots__ = "a", "b", "c", "d"
+    __slots__ = "a", "b", "c", "d", "_hidden"
     def __init__(self):
         self.a = {"one": "a", "two": "b"}
         self.b = "two"
         self.c = Color(0, 150, 255)
         self.d = Baz()
+        self._hidden = "Shouldn't show up"
 
     def postLoad(self):
         printLoadedClass(self)

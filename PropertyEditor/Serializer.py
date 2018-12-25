@@ -29,7 +29,7 @@ class Serializer():
             if hasattr(o, "__slots__"):
                 contents = {}
                 for key in o.__slots__:
-                    if key != "__dict__":
+                    if not key.startswith("_"):
                         contents[key] = getattr(o, key)
                 return { type(o).__name__ : contents }
 
@@ -56,7 +56,7 @@ class Serializer():
 
         # Otherwise, recurse into any modules we find.
         for k, v in nameList.__dict__.items():
-            if inspect.ismodule(v):
+            if inspect.ismodule(v) and not k.startswith("_"):
                 maybeClassType = Serializer.__getClassType(className, v)
                 if maybeClassType:
                     return maybeClassType
