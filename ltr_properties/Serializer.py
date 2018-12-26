@@ -2,7 +2,7 @@ import json
 import inspect
 
 class Serializer():
-    def decode(jsonStr, module, postLoadMethod="postLoad"):
+    def decode(jsonStr, module=None, postLoadMethod="postLoad"):
         decoder = json.JSONDecoder(
             object_hook=lambda jsonObject: Serializer.__decodeObjectHook(jsonObject, module, postLoadMethod)
             )
@@ -30,7 +30,7 @@ class Serializer():
                 return { type(o).__name__ : contents }
 
     def __decodeObjectHook(jsonObject, module, postLoadMethod):
-        if len(jsonObject) == 1:
+        if len(jsonObject) == 1 and module:
             className = next(iter(jsonObject.keys()))
             checkedModules = []
             classType = Serializer.__getClassType(className, module, checkedModules)

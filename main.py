@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 
-from PropertyEditor.PropertyEditorWidget import PropertyEditorWidget
-from PropertyEditor.EditorColor import EditorColor
-from PropertyEditor.EditorSlottedClass import EditorSlottedClassHorizontal
-from PropertyEditor.Serializer import Serializer
+from ltr_properties.PropertyEditorWidget import PropertyEditorWidget
+from ltr_properties.EditorColor import EditorColor
+from ltr_properties.EditorSlottedClass import EditorSlottedClassHorizontal
+from ltr_properties.Serializer import Serializer
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QScrollArea
 import sys
 
