@@ -12,7 +12,8 @@ filename = "mainOutput.json"
 def printLoadedClass(obj):
     classDesc = type(obj).__name__ + ":"
     for slot in obj.__slots__:
-        classDesc += " " + slot + "=" + str(getattr(obj, slot))
+        if hasattr(obj, slot):
+            classDesc += " " + slot + "=" + str(getattr(obj, slot))
     print("Loaded " + classDesc)
 
 class Color():
@@ -50,7 +51,7 @@ class Baz():
         printLoadedClass(self)
 
 class Bar(object):
-    __slots__ = "a", "b", "c", "d", "_hidden"
+    __slots__ = "a", "b", "c", "d", "_hidden", Serializer.fromFile
     def __init__(self):
         self.a = {"one": "a", "two": "b"}
         self.b = "two"
@@ -76,7 +77,7 @@ class Foo(object):
         printLoadedClass(self)
 
 def onDataChanged(obj):
-    Serializer.save(filename, obj)
+    Serializer.save(filename, obj, indent=3)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

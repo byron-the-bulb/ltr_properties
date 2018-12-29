@@ -2,6 +2,7 @@ import json
 import inspect
 
 class Serializer():
+    fromFile = "_fromFile"
     def decode(jsonStr, module=None, postLoadMethod="postLoad"):
         decoder = json.JSONDecoder(
             object_hook=lambda jsonObject: Serializer.__decodeObjectHook(jsonObject, module, postLoadMethod)
@@ -22,6 +23,8 @@ class Serializer():
 
     class __Encoder(json.JSONEncoder):
         def default(self, o):
+            if hasattr(o, Serializer.fromFile):
+                return { Serializer.fromFile: getattr(o, Serializer.fromFile) }
             if hasattr(o, "__slots__"):
                 contents = {}
                 for key in o.__slots__:
@@ -30,17 +33,23 @@ class Serializer():
                 return { type(o).__name__ : contents }
 
     def __decodeObjectHook(jsonObject, module, postLoadMethod):
-        if len(jsonObject) == 1 and module:
+        if len(jsonObject) == 1:
             className = next(iter(jsonObject.keys()))
-            checkedModules = []
-            classType = Serializer.__getClassType(className, module, checkedModules)
-            if classType:
-                classObj = classType()
-                for k, v in jsonObject[className].items():
-                    setattr(classObj, k, v)
-                if hasattr(classObj, postLoadMethod):
-                    getattr(classObj, postLoadMethod)()
-                return classObj
+            if className == Serializer.fromFile:
+                filename = jsonObject[className]
+                loadedObj = Serializer.load(filename, module, postLoadMethod)
+                setattr(loadedObj, Serializer.fromFile, filename)
+                return loadedObj
+            elif module:
+                checkedModules = []
+                classType = Serializer.__getClassType(className, module, checkedModules)
+                if classType:
+                    classObj = classType()
+                    for k, v in jsonObject[className].items():
+                        setattr(classObj, k, v)
+                    if hasattr(classObj, postLoadMethod):
+                        getattr(classObj, postLoadMethod)()
+                    return classObj
         
         return jsonObject
 
