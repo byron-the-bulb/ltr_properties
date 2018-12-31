@@ -25,9 +25,21 @@ class Serializer():
         def default(self, o):
             if hasattr(o, Serializer.fromFile):
                 return { Serializer.fromFile: getattr(o, Serializer.fromFile) }
-            if hasattr(o, "__slots__"):
+
+            hasSlots = False
+            slots = set()
+            for cls in o.__class__.__mro__:
+                if hasattr(cls, "__slots__"):
+                    hasSlots = True
+                    theseSlots = getattr(cls,"__slots__")
+                    if isinstance(theseSlots, str):
+                        slots.update([theseSlots])
+                    else:
+                        slots.update(theseSlots)
+
+            if hasSlots:
                 contents = {}
-                for key in o.__slots__:
+                for key in slots:
                     if not key.startswith("_"):
                         contents[key] = getattr(o, key)
                 return { type(o).__name__ : contents }
