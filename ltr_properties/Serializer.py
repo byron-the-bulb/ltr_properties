@@ -1,5 +1,6 @@
 import json
 import inspect
+import typing
 
 class Serializer():
     fromFile = "_fromFile"
@@ -56,8 +57,12 @@ class Serializer():
                 checkedModules = []
                 classType = Serializer.__getClassType(className, module, checkedModules)
                 if classType:
+                    typeHints = typing.get_type_hints(classType)
                     classObj = classType()
                     for k, v in jsonObject[className].items():
+                        if k in typeHints and not isinstance(v, typeHints[k]):
+                            raise TypeError(str(type(v)) + " is not type " + str(typeHints[k]) +
+                                " required for " + str(classType) + "." + k)
                         setattr(classObj, k, v)
                     if hasattr(classObj, postLoadMethod):
                         getattr(classObj, postLoadMethod)()
