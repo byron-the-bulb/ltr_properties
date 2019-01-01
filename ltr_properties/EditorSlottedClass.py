@@ -15,7 +15,11 @@ class __EditorSlottedClassBase(QWidget):
         self._createWidgetsForObject(layout, editorGenerator, targetObject)
 
     def _createWidgetsForObject(self, boxLayout, editorGenerator, targetObject):
-        for name in targetObject.__slots__:
+        slots = targetObject.__slots__
+        if isinstance(slots, str):
+            slots = [slots]
+            
+        for name in slots:
             # Let users add hidden properties (including __dict__).
             if name.startswith("_"):
                 continue
