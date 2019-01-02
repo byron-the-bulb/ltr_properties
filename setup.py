@@ -26,7 +26,7 @@ setup(
     long_description=read("README.rst"),
 
     packages=find_packages(exclude=('tests',)),
-    package_data={'ltr_properties', 'icons/*.png'}
+    package_data={'ltr_properties': ['icons/*.png']},
 
     install_requires=[],
 
