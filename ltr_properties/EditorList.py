@@ -1,6 +1,8 @@
 from .CompoundEditor import CompoundEditor
 from .Icons import Icons
 
+from .TypeUtils import getListElemTypeHint
+
 import copy
 
 class EditorList(CompoundEditor):
@@ -14,7 +16,9 @@ class EditorList(CompoundEditor):
 
             setter = lambda val, thisI=i: self._setListElem(thisI, val)
 
-            yield name, value, setter
+            elemHint = getListElemTypeHint(self._typeHint)
+
+            yield name, value, setter, elemHint
 
     # This is a replacement for this, which isn't valid:
     #  setter = lambda val, thisI=i: targetObject[thisI] = val
@@ -22,7 +26,11 @@ class EditorList(CompoundEditor):
         self._targetObject[i] = val
 
     def _addClicked(self):
-        self._targetObject.append(copy.deepcopy(self._targetObject[0]))
+        if self._typeHint:
+            elemHint = getListElemTypeHint(self._typeHint)
+            self._targetObject.append(elemHint())
+        else:
+            self._targetObject.append(copy.deepcopy(self._targetObject[0]))
         self._createWidgetsForObject()
         self.dataChanged.emit(self._targetObject)
 

@@ -1,6 +1,8 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QFrame, QHBoxLayout, QVBoxLayout, QPushButton
 from PyQt5.QtCore import pyqtSignal
 
+import typing
+
 from .EditorHeader import EditorHeader
 from .Icons import Icons
 from .UIUtils import clearLayout
@@ -11,17 +13,18 @@ class CompoundEditor(QWidget):
     isHorizontalLayout = False
     canDeleteElements = False
 
-    def __init__(self, editorGenerator, targetObject, name):
+    def __init__(self, editorGenerator, targetObject, name, typeHint):
         super().__init__()
 
         self._editorGenerator = editorGenerator
         self._targetObject = targetObject
+        self._typeHint = typeHint
 
         self._widgetLayout = self._createLayout(name)
         
         self._createWidgetsForObject()
 
-    # Should yield name, value, setter for each property.
+    # Should yield name, value, setter, typeHint for each property.
     def _getProperties(self):
         raise NotImplementedError()
 
@@ -34,8 +37,9 @@ class CompoundEditor(QWidget):
     def _createWidgetsForObject(self):
         # Make sure we can call this multiple times
         clearLayout(self._widgetLayout)
-        for name, value, setter in self._getProperties():
-            editor = self._editorGenerator.createWidget(value, name, setter)
+
+        for name, value, setter, typeHint in self._getProperties():
+            editor = self._editorGenerator.createWidget(value, name, setter, typeHint=typeHint)
             editor.dataChanged.connect(self._dataChanged)
 
             self._addEditorToLayout(name, editor)

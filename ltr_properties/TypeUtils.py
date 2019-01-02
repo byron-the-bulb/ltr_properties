@@ -16,11 +16,24 @@ def checkType(value, typeHint, path):
         raise TypeError(str(type(value)) + " is not type " + str(typeHint) +
             " required for " + path)
 
+def getDictKVTypeHints(typeHint):
+    # key, value
+    if typeHint:
+        return typeHint.__args__[0], typeHint.__args__[1]
+    else:
+        return None, None
+
+def getListElemTypeHint(typeHint):
+    if typeHint:
+        return typeHint.__args__[0]
+    else:
+        return None
+
 def _checkTypeList(value, typeHint):
     if type(value) != list:
         return False
     else:
-        elementType = typeHint.__args__[0]
+        elementType = getListElemTypeHint(typeHint)
         for element in value:
             if not isinstance(element, elementType):
                 return False
@@ -30,8 +43,7 @@ def _checkTypeDict(value, typeHint):
     if type(value) != dict:
         return False
     else:
-        keyType = typeHint.__args__[0]
-        valueType = typeHint.__args__[1]
+        keyType, valueType = getDictKVTypeHints(typeHint)
         for k, v in value.items():
             if not isinstance(k, keyType):
                 return False

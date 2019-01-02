@@ -4,12 +4,12 @@ from PyQt5.QtCore import pyqtSignal
 class EditorString(QLineEdit):
     dataChanged = pyqtSignal(str)
 
-    def __init__(self, editorGenerator, value, name):
+    def __init__(self, editorGenerator, targetObject, name, typeHint):
         super().__init__()
 
-        self.setText(value)
+        self.setText(targetObject)
 
-        self._oldValue = value
+        self._oldValue = targetObject
 
         self.editingFinished.connect(self._dataChanged)
 

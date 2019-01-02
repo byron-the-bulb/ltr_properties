@@ -11,6 +11,8 @@ from .EditorString import EditorString
 
 from .HoverableButton import HoverableButton
 
+from .TypeUtils import checkType
+
 class EditorGenerator(object):
     def __init__(self, customEditors, labelWidth, spinBoxWidth):
         self._customEditors = customEditors
@@ -21,28 +23,31 @@ class EditorGenerator(object):
         self._layoutSpacing = 4
         pass
 
-    def createWidget(self, value, name = None, changeCallback = None):
+    def createWidget(self, value, name = None, changeCallback = None, typeHint = None):
+        if typeHint:
+            checkType(value, typeHint, name)
+
         valType = type(value)
 
         # This set of elifs will either return a widget, or set this to a widget
         # that should then be connected to a setattr lambda to store the value.
         valueEditor = None
         if valType in self._customEditors:
-            return self._customEditors[valType](self, value, name)
+            return self._customEditors[valType](self, value, name, typeHint)
         elif valType == bool:
-            valueEditor = EditorBool(self, value, name)
+            valueEditor = EditorBool(self, value, name, typeHint)
         elif valType == int:
-            valueEditor = EditorInt(self, value, name)
+            valueEditor = EditorInt(self, value, name, typeHint)
         elif valType == float:
-            valueEditor = EditorFloat(self, value, name)
+            valueEditor = EditorFloat(self, value, name, typeHint)
         elif valType == str:
-            valueEditor = EditorString(self, value, name)
+            valueEditor = EditorString(self, value, name, typeHint)
         elif hasattr(value, "__slots__"):
-            valueEditor = EditorSlottedClass(self, value, name)
+            valueEditor = EditorSlottedClass(self, value, name, typeHint)
         elif valType == list:
-            valueEditor = EditorList(self, value, name)
+            valueEditor = EditorList(self, value, name, typeHint)
         elif valType == dict:
-            valueEditor = EditorDict(self, value, name)
+            valueEditor = EditorDict(self, value, name, typeHint)
         else:
             return QLabel(str(valType) + " is not implemented.\nIf it is a custom class, you need to use __slots__.")
 

@@ -8,10 +8,10 @@ from PyQt5.Qt import QColor
 class EditorColor(QPushButton):
     dataChanged = pyqtSignal(object)
 
-    def __init__(self, editorGenerator, value, name):
+    def __init__(self, editorGenerator, targetObject, name, typeHint):
         super().__init__()
 
-        self._value = value
+        self._value = targetObject
         self._updateButtonColor()
 
         self.clicked.connect(self._pickColor)
