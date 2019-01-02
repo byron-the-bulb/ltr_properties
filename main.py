@@ -51,12 +51,13 @@ class Baz():
         printLoadedClass(self)
 
 class Bar(object):
-    __slots__ = "a", "b", "c", "d", "_hidden", Serializer.fromFile
+    __slots__ = "a", "b", "c", "d", "e", "_hidden", Serializer.fromFile
     def __init__(self):
         self.a = {"one": "a", "two": "b"}
         self.b = "two"
-        self.c = Color(0, 150, 255)
-        self.d = Baz()
+        self.c = [Color(0, 150, 255), Color(), Color(255, 255, 255)]
+        self.d = [Vector(), Vector(1, 4, 9), Vector(255, 0, -255)]
+        self.e = Baz()
         self._hidden = "Shouldn't show up"
 
     def postLoad(self):

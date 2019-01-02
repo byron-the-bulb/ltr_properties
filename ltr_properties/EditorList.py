@@ -1,6 +1,8 @@
 from .CompoundEditor import CompoundEditor
 from .Icons import Icons
 
+import copy
+
 class EditorList(CompoundEditor):
     canDeleteElements = True
 
@@ -20,7 +22,7 @@ class EditorList(CompoundEditor):
         self._targetObject[i] = val
 
     def _addClicked(self):
-        self._targetObject.append(self._targetObject[0])
+        self._targetObject.append(copy.deepcopy(self._targetObject[0]))
         self._createWidgetsForObject()
         self.dataChanged.emit(self._targetObject)
 

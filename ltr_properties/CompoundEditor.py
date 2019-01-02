@@ -64,14 +64,20 @@ class CompoundEditor(QWidget):
             return layout
 
     def _addEditorToLayout(self, name, editor):
+        deleteButton = None
+        if self.canDeleteElements:
+            deleteButton = self._editorGenerator.createButton(Icons.Delete)
+            deleteButton.clicked.connect(lambda: self._deleteClicked(name))
+            
         if hasattr(editor, "shouldSkipLabel") and editor.shouldSkipLabel:
-            self._widgetLayout.addWidget(editor)
+            if deleteButton:
+                self._widgetLayout.addWidget(self._editorGenerator.wrapWidget("", editor, deleteButton))
+            else:
+                self._widgetLayout.addWidget(editor)
         elif self.isHorizontalLayout:
+            if deleteButton:
+                self._widgetLayout.addWidget(deleteButton)
             self._widgetLayout.addWidget(QLabel(name))
             self._widgetLayout.addWidget(editor)
         else:
-            preLabelWidget = None
-            if self.canDeleteElements:
-                preLabelWidget = self._editorGenerator.createButton(Icons.Delete)
-                preLabelWidget.clicked.connect(lambda: self._deleteClicked(name))
-            self._widgetLayout.addWidget(self._editorGenerator.wrapWidgetWithLabel(name, editor, preLabelWidget))
+            self._widgetLayout.addWidget(self._editorGenerator.wrapWidget(name, editor, deleteButton))

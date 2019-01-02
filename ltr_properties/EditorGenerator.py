@@ -71,7 +71,7 @@ class EditorGenerator(object):
     def spinBoxWidth(self):
         return self._spinBoxWidth
 
-    def wrapWidgetWithLabel(self, name, editor, preLabelWidget=None):
+    def wrapWidget(self, name, editor, preLabelWidget=None):
         holder = QWidget()
         layout = QHBoxLayout(holder)
 
@@ -83,9 +83,10 @@ class EditorGenerator(object):
         else:
             layout.addSpacing(self._preLabelWidth)
 
-        label = QLabel(name)
-        label.setFixedWidth(self._labelWidth)
-        layout.addWidget(label)
+        if name:
+            label = QLabel(name)
+            label.setFixedWidth(self._labelWidth)
+            layout.addWidget(label)
 
         layout.addWidget(editor)
 
