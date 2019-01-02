@@ -7,6 +7,8 @@ from ltr_properties.Serializer import Serializer
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QScrollArea
 import sys
 
+from typing import List, Dict
+
 filename = "mainOutput.json"
 
 def printLoadedClass(obj):
@@ -52,6 +54,15 @@ class Baz():
 
 class Bar(object):
     __slots__ = "a", "b", "c", "d", "e", "_hidden", Serializer.fromFile
+
+    # Type hints are optional, but are checked when deserializing. For lists and
+    # dicts, they allow empty lists/dicts to be filled with new elements, rather
+    # than requiring an existing element to duplicate.
+    a: Dict[str, str]
+    b: str
+    c: List[Color]
+    d: List[Vector]
+    e: Baz
     def __init__(self):
         self.a = {"one": "a", "two": "b"}
         self.b = "two"
@@ -91,7 +102,7 @@ if __name__ == '__main__':
     foo = None
     try:
         foo = Serializer.load(filename, currentModule)
-    except:
+    except FileNotFoundError:
         foo = Foo()
 
     pe = PropertyEditorWidget()

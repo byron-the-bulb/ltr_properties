@@ -2,6 +2,8 @@ import json
 import inspect
 import typing
 
+from .TypeUtils import checkType
+
 class Serializer():
     fromFile = "_fromFile"
     def decode(jsonStr, module=None, postLoadMethod="postLoad"):
@@ -60,34 +62,14 @@ class Serializer():
                     typeHints = typing.get_type_hints(classType)
                     classObj = classType()
                     for k, v in jsonObject[className].items():
-                        Serializer.__checkType(className, k, v, typeHints)
+                        if k in typeHints:
+                            checkType(v, typeHints[k], className + '.' + k)
                         setattr(classObj, k, v)
                     if hasattr(classObj, postLoadMethod):
                         getattr(classObj, postLoadMethod)()
                     return classObj
         
         return jsonObject
-
-    def __checkType(className, k, v, typeHints):
-        success = True
-        if k in typeHints:
-            typeHint = typeHints[k]
-            if hasattr(typeHint, "__origin__"):
-                if typeHint.__origin__ == typing.List:
-                    if type(v) != list:
-                        success = False
-                    else:
-                        for element in v:
-                            if not isinstance(element, typeHint.__args__[0]):
-                                success = False
-                else:
-                    raise NotImplementedError("Type checking not implemented for " + str(typeHint))
-            elif not isinstance(v, typeHints[k]):
-                success = False
-        
-        if not success:
-            raise TypeError(str(type(v)) + " is not type " + str(typeHint) +
-                " required for " + className + "." + k)
 
     def __getClassType(className, module, checkedModules):
         # See if we find the class in this namespace.
