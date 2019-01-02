@@ -55,6 +55,8 @@ class EditorGenerator(object):
         holder = QWidget()
         layout = QHBoxLayout(holder)
 
+        layout.setContentsMargins(0, 0, 0, 0)
+
         label = QLabel(name)
         label.setFixedWidth(self._labelWidth)
         layout.addWidget(label)

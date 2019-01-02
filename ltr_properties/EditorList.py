@@ -1,79 +1,20 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QFrame, QHBoxLayout, QVBoxLayout
-from PyQt5.QtCore import pyqtSignal
+from .CompoundEditor import CompoundEditor
 
-from .EditorHeader import EditorHeader
-
-class __EditorListBase(QWidget):
-    dataChanged = pyqtSignal(list)
-    shouldSkipLabel = True
-
-    def __init__(self, editorGenerator, targetObject, name):
-        super().__init__()
-
-        layout = self._createLayout(name)
-
-        self._targetObject = targetObject
-        
-        self._createWidgetsForList(layout, editorGenerator, targetObject)
-
-    def _createWidgetsForList(self, boxLayout, editorGenerator, targetList):
-        for i in range(len(targetList)):
+class EditorList(CompoundEditor):
+    def _getProperties(self, targetObject):
+        for i in range(len(targetObject)):
             name = str(i)
+
+            value = targetObject[i]
 
             setter = lambda val, thisI=i: self._setListElem(targetList, thisI, val)
 
-            editor = editorGenerator.createWidget(targetList[i], name, setter)
-            editor.dataChanged.connect(self._dataChanged)
-
-            self._addEditorToLayout(editorGenerator, boxLayout, name, editor)
-
-    def _dataChanged(self):
-        self.dataChanged.emit(self._targetObject)
+            yield name, value, setter
 
     # This is a replacement for this, which isn't valid:
     #  setter = lambda val, thisI=i: targetList[thisI] = val
     def _setListElem(self, targetList, i, val):
         targetList[i] = val
 
-class EditorList(__EditorListBase):
-    def __init__(self, editorGenerator, targetObject, name):
-        super().__init__(editorGenerator, targetObject, name)
-
-    def _createLayout(self, name):
-        selfLayout = QVBoxLayout(self)
-        frame = QFrame()
-        header = EditorHeader(name, frame)
-        selfLayout.addWidget(header)
-        selfLayout.addWidget(frame)
-        layout = QVBoxLayout(frame)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        return layout
-
-    def _addEditorToLayout(self, editorGenerator, boxLayout, name, editor):
-        if hasattr(editor, "shouldSkipLabel") and editor.shouldSkipLabel:
-            boxLayout.addWidget(editor)
-        else:
-            boxLayout.addWidget(editorGenerator.wrapWidgetWithLabel(name, editor))
-
-class EditorListHorizontal(__EditorListBase):
-    def __init__(self, editorGenerator, targetObject, name):
-        super().__init__(editorGenerator, targetObject, name)
-
-    def _createLayout(self, name):
-        selfLayout = QVBoxLayout(self)
-        frame = QFrame()
-        header = EditorHeader(name, frame)
-        selfLayout.addWidget(header)
-        selfLayout.addWidget(frame)
-        layout = QHBoxLayout(frame)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
-        return layout
-
-    def _addEditorToLayout(self, editorGenerator, boxLayout, name, editor):
-        if hasattr(editor, "shouldSkipLabel") and editor.shouldSkipLabel:
-            boxLayout.addWidget(editor)
-        else:
-            boxLayout.addWidget(QLabel(name))
-            boxLayout.addWidget(editor)
+class EditorListHorizontal(EditorList):
+    isHorizontalLayout = True

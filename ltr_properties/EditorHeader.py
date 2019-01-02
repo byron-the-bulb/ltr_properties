@@ -11,6 +11,8 @@ class EditorHeader(QWidget):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(4)
+        
+        layout.addWidget(QLabel(name))
 
         self.expandButton = QPushButton(Icons.ArrowDown, "")
         self.expandButton.setStyleSheet("""
@@ -21,8 +23,6 @@ class EditorHeader(QWidget):
         self.expandButton.setChecked(True)
         layout.addWidget(self.expandButton)
         self.expandButton.clicked.connect(self._expandButtonClicked)
-
-        layout.addWidget(QLabel(name))
 
         #for extraWidget in extraWidgets:
         #    layout.addWidget(extraWidget)
