@@ -2,7 +2,11 @@ from PyQt5.QtGui import QIcon, QPixmap
 
 from pkg_resources import resource_filename
 
+def _LoadIcon(pngName):
+    return QIcon(resource_filename(__name__, 'icons/' + pngName + '.png'))
+
 class Icons():
+    Add = None
     ArrowDown = None
     ArrowRight = None
     Delete = None
@@ -12,6 +16,7 @@ class Icons():
         if Icons.ArrowDown:
             return
         
-        Icons.ArrowDown = QIcon(resource_filename(__name__, 'icons/arrowDown.png'))
-        Icons.ArrowRight = QIcon(resource_filename(__name__, 'icons/arrowRight.png'))
-        Icons.Delete = QIcon(resource_filename(__name__, 'icons/delete.png'))
+        Icons.Add = _LoadIcon("add")
+        Icons.ArrowDown = _LoadIcon("arrowDown")
+        Icons.ArrowRight = _LoadIcon("arrowRight")
+        Icons.Delete = _LoadIcon("delete")

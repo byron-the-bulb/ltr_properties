@@ -2,7 +2,6 @@ from PyQt5.QtWidgets import QWidget, QLabel, QFrame, QHBoxLayout, QVBoxLayout, Q
 from PyQt5.QtCore import pyqtSignal
 
 from .EditorHeader import EditorHeader
-from .HoverableButton import HoverableButton
 from .Icons import Icons
 from .UIUtils import clearLayout
 
@@ -15,9 +14,10 @@ class CompoundEditor(QWidget):
     def __init__(self, editorGenerator, targetObject, name):
         super().__init__()
 
-        self._widgetLayout = self._createLayout(name, editorGenerator.preLabelWidth())
         self._editorGenerator = editorGenerator
         self._targetObject = targetObject
+
+        self._widgetLayout = self._createLayout(name)
         
         self._createWidgetsForObject()
 
@@ -28,6 +28,9 @@ class CompoundEditor(QWidget):
     def _deleteClicked(self, name):
         raise NotImplementedError()
 
+    def _getHeaderWidgets(self):
+        return []
+
     def _createWidgetsForObject(self):
         # Make sure we can call this multiple times
         clearLayout(self._widgetLayout)
@@ -35,21 +38,21 @@ class CompoundEditor(QWidget):
             editor = self._editorGenerator.createWidget(value, name, setter)
             editor.dataChanged.connect(self._dataChanged)
 
-            self._addEditorToLayout(self._editorGenerator, self._widgetLayout, name, editor)
+            self._addEditorToLayout(name, editor)
 
     def _dataChanged(self):
         if hasattr(self._targetObject, "onDataEdited"):
             self._targetObject.onDataEdited()
         self.dataChanged.emit(self._targetObject)
 
-    def _createLayout(self, name, preLabelWidth):
+    def _createLayout(self, name):
         selfLayout = QVBoxLayout(self)
         selfLayout.setContentsMargins(0, 0, 0, 0)
         selfLayout.setSpacing(0)
 
         frame = QFrame()
         if name:
-            header = EditorHeader(name, frame, preLabelWidth)
+            header = EditorHeader(name, frame, self._editorGenerator, self._getHeaderWidgets())
             selfLayout.addWidget(header)
         selfLayout.addWidget(frame)
 
@@ -60,15 +63,15 @@ class CompoundEditor(QWidget):
             layout = QVBoxLayout(frame)
             return layout
 
-    def _addEditorToLayout(self, editorGenerator, boxLayout, name, editor):
+    def _addEditorToLayout(self, name, editor):
         if hasattr(editor, "shouldSkipLabel") and editor.shouldSkipLabel:
-            boxLayout.addWidget(editor)
+            self._widgetLayout.addWidget(editor)
         elif self.isHorizontalLayout:
-            boxLayout.addWidget(QLabel(name))
-            boxLayout.addWidget(editor)
+            self._widgetLayout.addWidget(QLabel(name))
+            self._widgetLayout.addWidget(editor)
         else:
             preLabelWidget = None
             if self.canDeleteElements:
-                preLabelWidget = HoverableButton(Icons.Delete, "")
+                preLabelWidget = self._editorGenerator.createButton(Icons.Delete)
                 preLabelWidget.clicked.connect(lambda: self._deleteClicked(name))
-            boxLayout.addWidget(editorGenerator.wrapWidgetWithLabel(name, editor, preLabelWidget))
+            self._widgetLayout.addWidget(self._editorGenerator.wrapWidgetWithLabel(name, editor, preLabelWidget))

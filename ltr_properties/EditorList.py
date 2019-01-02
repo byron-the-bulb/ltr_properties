@@ -1,4 +1,5 @@
 from .CompoundEditor import CompoundEditor
+from .Icons import Icons
 
 class EditorList(CompoundEditor):
     canDeleteElements = True
@@ -18,10 +19,21 @@ class EditorList(CompoundEditor):
     def _setListElem(self, i, val):
         self._targetObject[i] = val
 
+    def _addClicked(self):
+        self._targetObject.append(self._targetObject[0])
+        self._createWidgetsForObject()
+        self.dataChanged.emit(self._targetObject)
+
     def _deleteClicked(self, name):
         i = int(name)
         del self._targetObject[i]
         self._createWidgetsForObject()
+        self.dataChanged.emit(self._targetObject)
+
+    def _getHeaderWidgets(self):
+        addButton = self._editorGenerator.createButton(Icons.Add)
+        addButton.clicked.connect(self._addClicked)
+        return [addButton]
 
 class EditorListHorizontal(EditorList):
     isHorizontalLayout = True

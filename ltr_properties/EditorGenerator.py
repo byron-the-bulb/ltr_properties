@@ -9,12 +9,16 @@ from .EditorList import EditorList
 from .EditorSlottedClass import EditorSlottedClass
 from .EditorString import EditorString
 
+from .HoverableButton import HoverableButton
+
 class EditorGenerator(object):
-    def __init__(self, customEditors, preLabelWidth, labelWidth, spinBoxWidth):
+    def __init__(self, customEditors, labelWidth, spinBoxWidth):
         self._customEditors = customEditors
-        self._preLabelWidth = preLabelWidth
         self._labelWidth = labelWidth
         self._spinBoxWidth = spinBoxWidth
+
+        self._preLabelWidth = 24
+        self._layoutSpacing = 4
         pass
 
     def createWidget(self, value, name = None, changeCallback = None):
@@ -46,8 +50,20 @@ class EditorGenerator(object):
             valueEditor.dataChanged.connect(lambda val: changeCallback(val))
         return valueEditor
 
+    def createButton(self, icon):
+        size = self._preLabelWidth - self._layoutSpacing
+
+        button = HoverableButton(icon, "")
+        button.setFixedSize(size, size)
+        button.setIconSize(QSize(size, size))
+
+        return button
+
     def labelWidth(self):
         return self._labelWidth
+
+    def layoutSpacing(self):
+        return self._layoutSpacing
 
     def preLabelWidth(self):
         return self._preLabelWidth
@@ -60,12 +76,9 @@ class EditorGenerator(object):
         layout = QHBoxLayout(holder)
 
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(self._layoutSpacing)
 
         if preLabelWidget:
-            size = self._preLabelWidth - layout.spacing()
-            preLabelWidget.setFixedSize(size, size)
-            if hasattr(preLabelWidget, "setIconSize"):
-                preLabelWidget.setIconSize(QSize(size, size))
             layout.addWidget(preLabelWidget)
         else:
             layout.addSpacing(self._preLabelWidth)
