@@ -19,6 +19,7 @@ class PropertyEditorWidget(QWidget):
         
         self._labelWidth = 100
         self._spinBoxWidth = 70
+        self._preLabelWidth = 24
 
         self._targetObject = None
 
@@ -30,11 +31,18 @@ class PropertyEditorWidget(QWidget):
     def labelWidth(self):
         return self._labelWidth
 
+    def preLabelWidth(self):
+        return self._preLabelWidth
+
     def registerCustomEditor(self, classObj, editorClass):
         self._customEditors[classObj] = editorClass
 
     def setLabelWidth(self, width):
         self._labelWidth = width
+        self._initUI()
+
+    def setPreLabelWidth(self, width):
+        self._preLabelWidth = width
         self._initUI()
 
     def setTargetObject(self, target):
@@ -58,7 +66,7 @@ class PropertyEditorWidget(QWidget):
         clearLayout(self.layout())
 
         if self._targetObject:
-            editorGenerator = EditorGenerator(self._customEditors, self._labelWidth, self._spinBoxWidth)
+            editorGenerator = EditorGenerator(self._customEditors, self._preLabelWidth, self._labelWidth, self._spinBoxWidth)
             editor = editorGenerator.createWidget(self._targetObject)
             if hasattr(editor, "dataChanged"):
                 editor.dataChanged.connect(self._dataChanged)

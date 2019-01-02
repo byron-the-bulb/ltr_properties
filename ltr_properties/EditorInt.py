@@ -7,7 +7,7 @@ class EditorInt(QSpinBox):
     def __init__(self, editorGenerator, value, name):
         super().__init__()
 
-        self.setFixedWidth(editorGenerator.getSpinBoxWidth())
+        self.setFixedWidth(editorGenerator.spinBoxWidth())
         self.setRange(-100000,100000)
         self.setValue(value)
 

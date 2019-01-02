@@ -1,5 +1,5 @@
-
 from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout
+from PyQt5.QtCore import QSize
 
 from .EditorBool import EditorBool
 from .EditorDict import EditorDict
@@ -10,8 +10,9 @@ from .EditorSlottedClass import EditorSlottedClass
 from .EditorString import EditorString
 
 class EditorGenerator(object):
-    def __init__(self, customEditors, labelWidth, spinBoxWidth):
+    def __init__(self, customEditors, preLabelWidth, labelWidth, spinBoxWidth):
         self._customEditors = customEditors
+        self._preLabelWidth = preLabelWidth
         self._labelWidth = labelWidth
         self._spinBoxWidth = spinBoxWidth
         pass
@@ -19,7 +20,7 @@ class EditorGenerator(object):
     def createWidget(self, value, name = None, changeCallback = None):
         valType = type(value)
 
-        # This set if elifs will either return a widget, or set this to a widget
+        # This set of elifs will either return a widget, or set this to a widget
         # that should then be connected to a setattr lambda to store the value.
         valueEditor = None
         if valType in self._customEditors:
@@ -45,17 +46,29 @@ class EditorGenerator(object):
             valueEditor.dataChanged.connect(lambda val: changeCallback(val))
         return valueEditor
 
-    def getLabelWidth(self):
+    def labelWidth(self):
         return self._labelWidth
 
-    def getSpinBoxWidth(self):
+    def preLabelWidth(self):
+        return self._preLabelWidth
+
+    def spinBoxWidth(self):
         return self._spinBoxWidth
 
-    def wrapWidgetWithLabel(self, name, editor):
+    def wrapWidgetWithLabel(self, name, editor, preLabelWidget=None):
         holder = QWidget()
         layout = QHBoxLayout(holder)
 
         layout.setContentsMargins(0, 0, 0, 0)
+
+        if preLabelWidget:
+            size = self._preLabelWidth - layout.spacing()
+            preLabelWidget.setFixedSize(size, size)
+            if hasattr(preLabelWidget, "setIconSize"):
+                preLabelWidget.setIconSize(QSize(size, size))
+            layout.addWidget(preLabelWidget)
+        else:
+            layout.addSpacing(self._preLabelWidth)
 
         label = QLabel(name)
         label.setFixedWidth(self._labelWidth)
