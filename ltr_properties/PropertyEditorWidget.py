@@ -1,6 +1,8 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from PyQt5.QtCore import pyqtSignal
 
+from .Icons import Icons
+
 from .EditorGenerator import EditorGenerator
 
 def clearLayout(layout):
@@ -11,6 +13,8 @@ class PropertyEditorWidget(QWidget):
     dataChanged = pyqtSignal()
 
     def __init__(self):
+        Icons.LoadIcons()
+
         super().__init__()
         
         self._labelWidth = 100

@@ -1,5 +1,7 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QGroupBox, QHBoxLayout, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QLabel, QFrame, QHBoxLayout, QVBoxLayout
 from PyQt5.QtCore import pyqtSignal
+
+from .EditorHeader import EditorHeader
 
 class __EditorSlottedClassBase(QWidget):
     dataChanged = pyqtSignal(object)
@@ -45,9 +47,11 @@ class EditorSlottedClass(__EditorSlottedClassBase):
         if (name):
             selfLayout = QVBoxLayout(self)
             selfLayout.setContentsMargins(0, 0, 0, 0)
-            box = QGroupBox(name)
-            selfLayout.addWidget(box)
-            layout = QVBoxLayout(box)
+            frame = QFrame()
+            header = EditorHeader(name, frame)
+            selfLayout.addWidget(header)
+            selfLayout.addWidget(frame)
+            layout = QVBoxLayout(frame)
         else:
             layout = QVBoxLayout(self)
 
@@ -67,9 +71,12 @@ class EditorSlottedClassHorizontal(__EditorSlottedClassBase):
 
     def _createLayout(self, name):
         selfLayout = QVBoxLayout(self)
-        box = QGroupBox(name)
-        selfLayout.addWidget(box)
-        layout = QHBoxLayout(box)
+        selfLayout.setContentsMargins(0, 0, 0, 0)
+        frame = QFrame()
+        header = EditorHeader(name, frame)
+        selfLayout.addWidget(header)
+        selfLayout.addWidget(frame)
+        layout = QHBoxLayout(frame)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(2)
         return layout

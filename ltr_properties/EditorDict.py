@@ -1,5 +1,7 @@
-from PyQt5.QtWidgets import QWidget, QLabel, QGroupBox, QHBoxLayout, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QLabel, QFrame, QHBoxLayout, QVBoxLayout
 from PyQt5.QtCore import pyqtSignal
+
+from .EditorHeader import EditorHeader
 
 class EditorDict(QWidget):
     dataChanged = pyqtSignal(dict)
@@ -9,9 +11,11 @@ class EditorDict(QWidget):
         super().__init__()
 
         selfLayout = QVBoxLayout(self)
-        box = QGroupBox(name)
-        selfLayout.addWidget(box)
-        layout = QVBoxLayout(box)
+        frame = QFrame()
+        header = EditorHeader(name, frame)
+        selfLayout.addWidget(header)
+        selfLayout.addWidget(frame)
+        layout = QVBoxLayout(frame)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
