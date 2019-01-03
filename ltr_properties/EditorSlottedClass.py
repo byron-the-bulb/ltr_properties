@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QComboBox
 
 from .CompoundEditor import CompoundEditor
-
 from .TypeUtils import getAllSlots
 
 import typing
@@ -47,8 +46,18 @@ class EditorSlottedClass(CompoundEditor):
     def _classSelected(self, newClassName):
         if newClassName == type(self._targetObject).__name__:
             return
+
+        #TODO: Fix this monstrosity
+        from .PropertyEditorWidget import PropertyEditorWidget
+
+        if PropertyEditorWidget.threadLock:
+            PropertyEditorWidget.threadLock.acquire()
             
-        newClass = next(c for c in self._getSelectableClasses() if c.__name__ == newClassName)
+        newClass = None
+        for c in self._getSelectableClasses():
+             if c.__name__ == newClassName:
+                 newClass = c
+
         newObject = newClass()
         newSlots = getAllSlots(newObject)
         for oldName in getAllSlots(self._targetObject):
@@ -57,6 +66,9 @@ class EditorSlottedClass(CompoundEditor):
         self._targetObject = newObject
         self.dataChanged.emit(newObject)
         self._createWidgetsForObject()
+
+        if PropertyEditorWidget.threadLock:
+            PropertyEditorWidget.threadLock.release()
 
 class EditorSlottedClassHorizontal(EditorSlottedClass):
     isHorizontalLayout = True

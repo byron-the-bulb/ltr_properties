@@ -5,12 +5,13 @@ from .Icons import Icons
 
 from .EditorGenerator import EditorGenerator
 
-def clearLayout(layout):
-    for i in reversed(range(layout.count())): 
-        layout.itemAt(i).widget().setParent(None)
+from .UIUtils import clearLayout
 
 class PropertyEditorWidget(QWidget):
     dataChanged = pyqtSignal()
+
+    #TODO: Do this in a less hacky way
+    threadLock = None
 
     def __init__(self):
         Icons.LoadIcons()
