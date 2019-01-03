@@ -30,7 +30,7 @@ class Serializer():
 
             slots = getAllSlots(o)
 
-            if slots:
+            if slots != None:
                 contents = {}
                 for key in slots:
                     if not key.startswith("_") and hasattr(o, key):

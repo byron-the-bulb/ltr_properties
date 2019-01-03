@@ -5,7 +5,7 @@ def getAllSlots(obj):
     slots = None
     for cls in obj.__class__.__mro__:
         if hasattr(cls, "__slots__"):
-            if not slots:
+            if slots == None:
                 slots = []
             theseSlots = getattr(cls,"__slots__")
             if isinstance(theseSlots, str) and not theseSlots in slots:
