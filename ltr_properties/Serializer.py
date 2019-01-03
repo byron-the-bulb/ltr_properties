@@ -1,8 +1,7 @@
 import json
-import inspect
 import typing
 
-from .TypeUtils import checkType
+from .TypeUtils import checkType, getClassType, getAllSlots
 
 class Serializer():
     fromFile = "_fromFile"
@@ -29,21 +28,12 @@ class Serializer():
             if hasattr(o, Serializer.fromFile):
                 return { Serializer.fromFile: getattr(o, Serializer.fromFile) }
 
-            hasSlots = False
-            slots = set()
-            for cls in o.__class__.__mro__:
-                if hasattr(cls, "__slots__"):
-                    hasSlots = True
-                    theseSlots = getattr(cls,"__slots__")
-                    if isinstance(theseSlots, str):
-                        slots.update([theseSlots])
-                    else:
-                        slots.update(theseSlots)
+            slots = getAllSlots(o)
 
-            if hasSlots:
+            if slots:
                 contents = {}
                 for key in slots:
-                    if not key.startswith("_"):
+                    if not key.startswith("_") and hasattr(o, key):
                         contents[key] = getattr(o, key)
                 return { type(o).__name__ : contents }
 
@@ -57,7 +47,7 @@ class Serializer():
                 return loadedObj
             elif module:
                 checkedModules = []
-                classType = Serializer.__getClassType(className, module, checkedModules)
+                classType = getClassType(className, module, checkedModules)
                 if classType:
                     typeHints = typing.get_type_hints(classType)
                     classObj = classType()
@@ -70,21 +60,3 @@ class Serializer():
                     return classObj
         
         return jsonObject
-
-    def __getClassType(className, module, checkedModules):
-        # See if we find the class in this namespace.
-        if hasattr(module, className):
-            maybeClassType = getattr(module, className)
-            if inspect.isclass(maybeClassType):
-                return maybeClassType
-
-        # Otherwise, recurse into any modules we find.
-        for k, v in module.__dict__.items():
-            if inspect.ismodule(v) and not k.startswith("_") and not k in checkedModules:
-                checkedModules.append(k)
-                maybeClassType = Serializer.__getClassType(className, v, checkedModules)
-                if maybeClassType:
-                    return maybeClassType
-
-        # No dice.
-        return None

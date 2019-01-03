@@ -5,6 +5,7 @@ from ltr_properties.EditorColor import EditorColor
 from ltr_properties.EditorSlottedClass import EditorSlottedClassHorizontal
 from ltr_properties.Serializer import Serializer
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QScrollArea
+import json
 import sys
 
 from typing import List, Dict
@@ -51,6 +52,10 @@ class Baz():
 
     def postLoad(self):
         printLoadedClass(self)
+
+class FancyBaz(Baz):
+    __slots__ = "fanciness"
+    fanciness: int
 
 class Bar(object):
     __slots__ = "a", "b", "c", "d", "e", "_hidden", Serializer.fromFile
@@ -102,7 +107,7 @@ if __name__ == '__main__':
     foo = None
     try:
         foo = Serializer.load(filename, currentModule)
-    except FileNotFoundError:
+    except (FileNotFoundError, json.decoder.JSONDecodeError):
         foo = Foo()
 
     pe = PropertyEditorWidget()

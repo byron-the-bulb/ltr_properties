@@ -1,4 +1,38 @@
 import typing
+import inspect
+
+def getAllSlots(obj):
+    slots = None
+    for cls in obj.__class__.__mro__:
+        if hasattr(cls, "__slots__"):
+            if not slots:
+                slots = []
+            theseSlots = getattr(cls,"__slots__")
+            if isinstance(theseSlots, str) and not theseSlots in slots:
+                slots.append(theseSlots)
+            else:
+                for slot in theseSlots:
+                    if not slot in slots:
+                        slots.append(slot)
+    return slots
+
+def getClassType(className, module, checkedModules):
+    # See if we find the class in this namespace.
+    if hasattr(module, className):
+        maybeClassType = getattr(module, className)
+        if inspect.isclass(maybeClassType):
+            return maybeClassType
+
+    # Otherwise, recurse into any modules we find.
+    for k, v in module.__dict__.items():
+        if inspect.ismodule(v) and not k.startswith("_") and not k in checkedModules:
+            checkedModules.append(k)
+            maybeClassType = getClassType(className, v, checkedModules)
+            if maybeClassType:
+                return maybeClassType
+
+    # No dice.
+    return None
 
 def checkType(value, typeHint, path):
     success = True
