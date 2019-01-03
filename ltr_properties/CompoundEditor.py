@@ -40,7 +40,9 @@ class CompoundEditor(QWidget):
 
         for name, value, setter, typeHint in self._getProperties():
             editor = self._editorGenerator.createWidget(value, name, setter, typeHint=typeHint)
-            editor.dataChanged.connect(self._dataChanged)
+
+            if hasattr(editor, "dataChanged"):
+                editor.dataChanged.connect(self._dataChanged)
 
             self._addEditorToLayout(name, editor)
 

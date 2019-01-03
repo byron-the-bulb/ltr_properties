@@ -8,12 +8,12 @@ def getAllSlots(obj):
             if slots == None:
                 slots = []
             theseSlots = getattr(cls,"__slots__")
-            if isinstance(theseSlots, str) and not theseSlots in slots:
-                slots.append(theseSlots)
-            else:
-                for slot in theseSlots:
-                    if not slot in slots:
-                        slots.append(slot)
+            if isinstance(theseSlots, str):
+                theseSlots = [theseSlots]
+                
+            for slot in theseSlots:
+                if not slot in slots:
+                    slots.append(slot)
     return slots
 
 def getClassType(className, module, checkedModules):

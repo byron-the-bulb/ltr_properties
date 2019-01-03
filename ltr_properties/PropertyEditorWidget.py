@@ -7,23 +7,24 @@ from .EditorGenerator import EditorGenerator
 
 from .UIUtils import clearLayout
 
+import threading
+
 class PropertyEditorWidget(QWidget):
     dataChanged = pyqtSignal()
 
-    #TODO: Do this in a less hacky way
-    threadLock = None
-
-    def __init__(self):
+    def __init__(self, targetObject=None, labelWidth=100, spinBoxWidth=70, customEditors={}):
         Icons.LoadIcons()
 
         super().__init__()
         
-        self._labelWidth = 100
-        self._spinBoxWidth = 70
+        self._labelWidth = labelWidth
+        self._spinBoxWidth = spinBoxWidth
 
-        self._targetObject = None
+        self._targetObject = targetObject
 
-        self._customEditors = {}
+        self._customEditors = customEditors
+
+        self._threadLock = threading.Lock()
            
         QVBoxLayout(self)
         self.layout().setContentsMargins(0, 0, 0, 0)
@@ -33,6 +34,7 @@ class PropertyEditorWidget(QWidget):
 
     def registerCustomEditor(self, classObj, editorClass):
         self._customEditors[classObj] = editorClass
+        self._initUI()
 
     def setLabelWidth(self, width):
         self._labelWidth = width
@@ -46,11 +48,18 @@ class PropertyEditorWidget(QWidget):
         self._spinBoxWidth = width
         self._initUI()
 
+    def setThreadLock(self, threadLock):
+        self._threadLock = threadLock
+        self._initUI()
+
     def spinBoxWidth(self):
         return self._spinBoxWidth
 
     def targetObject(self):
         return self._targetObject
+
+    def threadLock(self):
+        return self._threadLock
         
     def _dataChanged(self):
         self.dataChanged.emit()
@@ -59,7 +68,7 @@ class PropertyEditorWidget(QWidget):
         clearLayout(self.layout())
 
         if self._targetObject:
-            editorGenerator = EditorGenerator(self._customEditors, self._labelWidth, self._spinBoxWidth)
+            editorGenerator = EditorGenerator(self._customEditors, self._labelWidth, self._spinBoxWidth, self._threadLock)
             editor = editorGenerator.createWidget(self._targetObject)
             if hasattr(editor, "dataChanged"):
                 editor.dataChanged.connect(self._dataChanged)

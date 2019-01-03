@@ -10,6 +10,7 @@ class EditorColor(QPushButton):
 
     def __init__(self, editorGenerator, targetObject, name, typeHint):
         super().__init__()
+        self._editorGenerator = editorGenerator
 
         self._value = targetObject
         self._updateButtonColor()
@@ -22,11 +23,12 @@ class EditorColor(QPushButton):
         dialog.setOption(QColorDialog.DontUseNativeDialog)
         dialog.setStyleSheet("")
         if dialog.exec() == QColorDialog.Accepted:
-            newR, newG, newB, dummy = dialog.currentColor().getRgb()
-            if [newR, newG, newB] != [r, g, b]:
-                self._value.setRgb(newR, newG, newB)
-                self.dataChanged.emit(self._value)
-                self._updateButtonColor()
+            with self._editorGenerator.threadLock():
+                newR, newG, newB, dummy = dialog.currentColor().getRgb()
+                if [newR, newG, newB] != [r, g, b]:
+                    self._value.setRgb(newR, newG, newB)
+                    self.dataChanged.emit(self._value)
+                    self._updateButtonColor()
 
     def _updateButtonColor(self):
         r, g, b = self._value.getRgb()

@@ -14,10 +14,11 @@ from .HoverableButton import HoverableButton
 from .TypeUtils import checkType
 
 class EditorGenerator(object):
-    def __init__(self, customEditors, labelWidth, spinBoxWidth):
+    def __init__(self, customEditors, labelWidth, spinBoxWidth, threadLock):
         self._customEditors = customEditors
         self._labelWidth = labelWidth
         self._spinBoxWidth = spinBoxWidth
+        self._threadLock = threadLock
 
         self._preLabelWidth = 24
         self._layoutSpacing = 4
@@ -75,6 +76,9 @@ class EditorGenerator(object):
 
     def spinBoxWidth(self):
         return self._spinBoxWidth
+
+    def threadLock(self):
+        return self._threadLock
 
     def wrapWidget(self, name, editor, preLabelWidget=None):
         holder = QWidget()

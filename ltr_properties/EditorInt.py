@@ -6,6 +6,7 @@ class EditorInt(QSpinBox):
 
     def __init__(self, editorGenerator, targetObject, name, typeHint):
         super().__init__()
+        self._editorGenerator = editorGenerator
 
         self.setFixedWidth(editorGenerator.spinBoxWidth())
         self.setRange(-100000,100000)
@@ -14,4 +15,5 @@ class EditorInt(QSpinBox):
         self.valueChanged.connect(self._dataChanged)
 
     def _dataChanged(self, newVal):
-        self.dataChanged.emit(newVal)
+        with self._editorGenerator.threadLock():
+            self.dataChanged.emit(newVal)

@@ -6,6 +6,7 @@ class EditorString(QLineEdit):
 
     def __init__(self, editorGenerator, targetObject, name, typeHint):
         super().__init__()
+        self._editorGenerator = editorGenerator
 
         self.setText(targetObject)
 
@@ -15,5 +16,6 @@ class EditorString(QLineEdit):
 
     def _dataChanged(self):
         if self._oldValue != self.text():
-            self.dataChanged.emit(self.text())
-            self._oldValue = self.text()
+            with self._editorGenerator.threadLock():
+                self.dataChanged.emit(self.text())
+                self._oldValue = self.text()

@@ -47,28 +47,20 @@ class EditorSlottedClass(CompoundEditor):
         if newClassName == type(self._targetObject).__name__:
             return
 
-        #TODO: Fix this monstrosity
-        from .PropertyEditorWidget import PropertyEditorWidget
+        with self._editorGenerator.threadLock():
+            newClass = None
+            for c in self._getSelectableClasses():
+                if c.__name__ == newClassName:
+                    newClass = c
 
-        if PropertyEditorWidget.threadLock:
-            PropertyEditorWidget.threadLock.acquire()
-            
-        newClass = None
-        for c in self._getSelectableClasses():
-             if c.__name__ == newClassName:
-                 newClass = c
-
-        newObject = newClass()
-        newSlots = getAllSlots(newObject)
-        for oldName in getAllSlots(self._targetObject):
-            if oldName in newSlots:
-                setattr(newObject, oldName, getattr(self._targetObject, oldName))
-        self._targetObject = newObject
-        self.dataChanged.emit(newObject)
-        self._createWidgetsForObject()
-
-        if PropertyEditorWidget.threadLock:
-            PropertyEditorWidget.threadLock.release()
+            newObject = newClass()
+            newSlots = getAllSlots(newObject)
+            for oldName in getAllSlots(self._targetObject):
+                if oldName in newSlots and hasattr(self._targetObject, oldName):
+                    setattr(newObject, oldName, getattr(self._targetObject, oldName))
+            self._targetObject = newObject
+            self.dataChanged.emit(newObject)
+            self._createWidgetsForObject()
 
 class EditorSlottedClassHorizontal(EditorSlottedClass):
     isHorizontalLayout = True

@@ -6,11 +6,13 @@ class EditorBool(QCheckBox):
 
     def __init__(self, editorGenerator, targetObject, name, typeHint):
         super().__init__()
+        self._editorGenerator = editorGenerator
 
         self.setCheckState(2 if targetObject else 0)
 
         self.stateChanged.connect(self._dataChanged)
 
     def _dataChanged(self, newVal):
-        boolValue = True if newVal > 0 else False
-        self.dataChanged.emit(boolValue)
+        with self._editorGenerator.threadLock():
+            boolValue = True if newVal > 0 else False
+            self.dataChanged.emit(boolValue)

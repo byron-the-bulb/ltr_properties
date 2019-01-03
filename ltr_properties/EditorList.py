@@ -26,19 +26,21 @@ class EditorList(CompoundEditor):
         self._targetObject[i] = val
 
     def _addClicked(self):
-        if self._typeHint:
-            elemHint = getListElemTypeHint(self._typeHint)
-            self._targetObject.append(elemHint())
-        else:
-            self._targetObject.append(copy.deepcopy(self._targetObject[0]))
-        self._createWidgetsForObject()
-        self.dataChanged.emit(self._targetObject)
+        with self._editorGenerator.threadLock():
+            if self._typeHint:
+                elemHint = getListElemTypeHint(self._typeHint)
+                self._targetObject.append(elemHint())
+            else:
+                self._targetObject.append(copy.deepcopy(self._targetObject[0]))
+            self._createWidgetsForObject()
+            self.dataChanged.emit(self._targetObject)
 
     def _deleteClicked(self, name):
-        i = int(name)
-        del self._targetObject[i]
-        self._createWidgetsForObject()
-        self.dataChanged.emit(self._targetObject)
+        with self._editorGenerator.threadLock():
+            i = int(name)
+            del self._targetObject[i]
+            self._createWidgetsForObject()
+            self.dataChanged.emit(self._targetObject)
 
     def _getHeaderWidgets(self):
         addButton = self._editorGenerator.createButton(Icons.Add)
