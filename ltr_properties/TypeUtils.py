@@ -1,5 +1,6 @@
 import typing
 import inspect
+from . import Link
 
 def getAllSlots(obj):
     slots = None
@@ -41,6 +42,8 @@ def checkType(value, typeHint, path):
             success = _checkTypeList(value, typeHint)
         elif typeHint.__origin__ == typing.Dict:
             success = _checkTypeDict(value, typeHint)
+        elif typeHint.__origin__ == Link.Link:
+            success = _checkTypeLink(value, typeHint)
         else:
             raise NotImplementedError("Type checking not implemented for " + str(typeHint))
     elif not isinstance(value, typeHint):
@@ -58,6 +61,12 @@ def getDictKVTypeHints(typeHint):
         return None, None
 
 def getListElemTypeHint(typeHint):
+    if typeHint:
+        return typeHint.__args__[0]
+    else:
+        return None
+
+def getLinkTypeHint(typeHint):
     if typeHint:
         return typeHint.__args__[0]
     else:
@@ -83,4 +92,14 @@ def _checkTypeDict(value, typeHint):
                 return False
             if not isinstance(v, valueType):
                 return False
+    return True
+
+def _checkTypeLink(value, typeHint):
+    if type(value) != Link.Link:
+        return False
+    else:
+        linkType = getLinkTypeHint(typeHint)
+        linkedObject = value._object
+        if linkedObject != None and not isinstance(linkedObject, linkType):
+            return False
     return True

@@ -1,13 +1,13 @@
 import json
 import typing
 
-from .TypeUtils import checkType, getClassType, getAllSlots
+from . import TypeUtils
+from .Names import Names
 
 class Serializer():
-    fromFile = "_fromFile"
-    def decode(jsonStr, module=None, postLoadMethod="postLoad"):
+    def decode(jsonStr, module=None):
         decoder = json.JSONDecoder(
-            object_hook=lambda jsonObject: Serializer.__decodeObjectHook(jsonObject, module, postLoadMethod)
+            object_hook=lambda jsonObject: Serializer.__decodeObjectHook(jsonObject, module)
             )
         return decoder.decode(jsonStr)
 
@@ -15,9 +15,9 @@ class Serializer():
         encoder = Serializer.__Encoder(indent=indent)
         return encoder.encode(obj)
     
-    def load(filename, module, postLoadMethod="postLoad"):
+    def load(filename, module):
         with open(filename, 'r') as loadFile:
-            return Serializer.decode(loadFile.read(), module, postLoadMethod)
+            return Serializer.decode(loadFile.read(), module)
 
     def save(filename, obj, indent=None):
         with open(filename, 'w') as saveFile:
@@ -25,10 +25,7 @@ class Serializer():
 
     class __Encoder(json.JSONEncoder):
         def default(self, o):
-            if hasattr(o, Serializer.fromFile):
-                return { Serializer.fromFile: getattr(o, Serializer.fromFile) }
-
-            slots = getAllSlots(o)
+            slots = TypeUtils.getAllSlots(o)
 
             if slots != None:
                 contents = {}
@@ -37,26 +34,25 @@ class Serializer():
                         contents[key] = getattr(o, key)
                 return { type(o).__name__ : contents }
 
-    def __decodeObjectHook(jsonObject, module, postLoadMethod):
+    def __decodeObjectHook(jsonObject, module):
         if len(jsonObject) == 1:
             className = next(iter(jsonObject.keys()))
-            if className == Serializer.fromFile:
-                filename = jsonObject[className]
-                loadedObj = Serializer.load(filename, module, postLoadMethod)
-                setattr(loadedObj, Serializer.fromFile, filename)
-                return loadedObj
-            elif module:
+            if module:
                 checkedModules = []
-                classType = getClassType(className, module, checkedModules)
+                classType = TypeUtils.getClassType(className, module, checkedModules)
                 if classType:
                     typeHints = typing.get_type_hints(classType)
                     classObj = classType()
                     for k, v in jsonObject[className].items():
                         if k in typeHints:
-                            checkType(v, typeHints[k], className + '.' + k)
+                            TypeUtils.checkType(v, typeHints[k], className + '.' + k)
                         setattr(classObj, k, v)
-                    if hasattr(classObj, postLoadMethod):
-                        getattr(classObj, postLoadMethod)()
+
+                    if Names.loadModule in classType.__slots__:
+                        setattr(classObj, Names.loadModule, module)
+                    if hasattr(classObj, Names.postLoadMethod):
+                        getattr(classObj, Names.postLoadMethod)()
+
                     return classObj
         
         return jsonObject

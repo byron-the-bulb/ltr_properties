@@ -1,16 +1,13 @@
 #!/usr/bin/python3
 
-from ltr_properties.PropertyEditorWidget import PropertyEditorWidget
-from ltr_properties.EditorColor import EditorColor
-from ltr_properties.EditorSlottedClass import EditorSlottedClassHorizontal
-from ltr_properties.Serializer import Serializer
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QScrollArea
+import ltr_properties
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QScrollArea
 import json
 import sys
 
 from typing import List, Dict
 
-filename = "mainOutput.json"
+filename = "data/mainOutput.json"
 
 def printLoadedClass(obj):
     classDesc = type(obj).__name__ + ":"
@@ -55,10 +52,10 @@ class Baz():
 
 class FancyBaz(Baz):
     __slots__ = "fanciness"
-    fanciness: int
+    fanciness: ltr_properties.Link[Color]
 
 class Bar(object):
-    __slots__ = "a", "b", "c", "d", "e", "_hidden", Serializer.fromFile
+    __slots__ = "a", "b", "c", "d", "e", "_hidden"
 
     # Type hints are optional, but are checked when deserializing. For lists and
     # dicts, they allow empty lists/dicts to be filled with new elements, rather
@@ -94,32 +91,44 @@ class Foo(object):
         printLoadedClass(self)
 
 def onDataChanged(obj):
-    Serializer.save(filename, obj, indent=3)
+    ltr_properties.Serializer.save(filename, obj, indent=3)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    mainWidget = QScrollArea()
-    mainLayout = QVBoxLayout(mainWidget)
-    mainLayout.setContentsMargins(0, 0, 0, 0)
+    mainWidget = QWidget()
+    mainLayout = QHBoxLayout(mainWidget)
+
     currentModule = sys.modules[__name__]
+
+    objectTree = ltr_properties.ObjectTree("data")
+    sizePolicy = objectTree.sizePolicy()
+    sizePolicy.setHorizontalStretch(1)
+    objectTree.setSizePolicy(sizePolicy)
+    mainLayout.addWidget(objectTree)
+
+    editorWidget = QScrollArea()
+    sizePolicy = editorWidget.sizePolicy()
+    sizePolicy.setHorizontalStretch(2)
+    editorWidget.setSizePolicy(sizePolicy)
+    mainLayout.addWidget(editorWidget)
 
     foo = None
     try:
-        foo = Serializer.load(filename, currentModule)
+        foo = ltr_properties.Serializer.load(filename, currentModule)
     except (FileNotFoundError, json.decoder.JSONDecodeError):
         foo = Foo()
 
-    pe = PropertyEditorWidget()
-    pe.registerCustomEditor(Color, EditorColor)
-    pe.registerCustomEditor(Vector, EditorSlottedClassHorizontal)
+    pe = ltr_properties.PropertyEditorWidget()
+    pe.registerCustomEditor(Color, ltr_properties.EditorColor)
+    pe.registerCustomEditor(Vector, ltr_properties.EditorSlottedClassHorizontal)
     pe.setTargetObject(foo)
 
     pe.dataChanged.connect(lambda: onDataChanged(foo))
 
-    mainWidget.setWidget(pe)
+    editorWidget.setWidget(pe)
 
-    mainWidget.setGeometry(300, 200, 600, 900)
+    mainWidget.setGeometry(300, 200, 900, 900)
     mainWidget.setWindowTitle('LtRandolph Property Editor')
     mainWidget.show()
     app.exec_()
