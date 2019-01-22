@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import ltr_properties
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QScrollArea
+from PyQt5.QtWidgets import QApplication
 import json
 import sys
 
@@ -96,22 +96,7 @@ def onDataChanged(obj):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    mainWidget = QWidget()
-    mainLayout = QHBoxLayout(mainWidget)
-
     currentModule = sys.modules[__name__]
-
-    objectTree = ltr_properties.ObjectTree("data")
-    sizePolicy = objectTree.sizePolicy()
-    sizePolicy.setHorizontalStretch(1)
-    objectTree.setSizePolicy(sizePolicy)
-    mainLayout.addWidget(objectTree)
-
-    editorWidget = QScrollArea()
-    sizePolicy = editorWidget.sizePolicy()
-    sizePolicy.setHorizontalStretch(2)
-    editorWidget.setSizePolicy(sizePolicy)
-    mainLayout.addWidget(editorWidget)
 
     foo = None
     try:
@@ -119,16 +104,12 @@ if __name__ == '__main__':
     except (FileNotFoundError, json.decoder.JSONDecodeError):
         foo = Foo()
 
-    pe = ltr_properties.PropertyEditorWidget()
-    pe.registerCustomEditor(Color, ltr_properties.EditorColor)
-    pe.registerCustomEditor(Vector, ltr_properties.EditorSlottedClassHorizontal)
-    pe.setTargetObject(foo)
+    ltrEditor = ltr_properties.LtrEditor("data")
+    ltrEditor.addCustomEditorMapping(Color, ltr_properties.EditorColor)
+    ltrEditor.addCustomEditorMapping(Vector, ltr_properties.EditorSlottedClassHorizontal)
+    ltrEditor.addTargetObject(foo, "Foo", lambda: onDataChanged(foo))
 
-    pe.dataChanged.connect(lambda: onDataChanged(foo))
-
-    editorWidget.setWidget(pe)
-
-    mainWidget.setGeometry(300, 200, 900, 900)
-    mainWidget.setWindowTitle('LtRandolph Property Editor')
-    mainWidget.show()
+    ltrEditor.setGeometry(300, 200, 900, 900)
+    ltrEditor.setWindowTitle('LtRandolph Property Editor')
+    ltrEditor.show()
     app.exec_()

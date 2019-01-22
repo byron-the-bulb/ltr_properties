@@ -1,5 +1,6 @@
 """ltr_properties - A Qt-based property editor framework"""
 
+from .LtrEditor import LtrEditor
 from .Serializer import Serializer
 from .PropertyEditorWidget import PropertyEditorWidget
 from .ObjectTree import ObjectTree
