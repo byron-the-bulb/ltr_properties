@@ -12,6 +12,8 @@ class Icons():
     Delete = None
     Goto = None
     Open = None
+    Revert = None
+    Save = None
 
     @staticmethod
     def LoadIcons():
@@ -24,3 +26,5 @@ class Icons():
         Icons.Delete = _LoadIcon("delete")
         Icons.Goto = _LoadIcon("goto")
         Icons.Open = _LoadIcon("open")
+        Icons.Revert = _LoadIcon("revert")
+        Icons.Save = _LoadIcon("save")

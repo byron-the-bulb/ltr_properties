@@ -13,9 +13,10 @@ class PropertyEditorWidget(QWidget):
     dataChanged = pyqtSignal()
 
     def __init__(self, serializer, targetObject=None, labelWidth=100, spinBoxWidth=70, customEditors={}):
-        Icons.LoadIcons()
-
         super().__init__()
+
+        # Make sure icons are loaded before we use them.
+        Icons.LoadIcons()
 
         self._serializer = serializer
         
