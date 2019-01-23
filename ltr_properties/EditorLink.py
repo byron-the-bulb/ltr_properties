@@ -1,4 +1,5 @@
 from .Link import Link
+from .Icons import Icons
 from . import TypeUtils
 
 from PyQt5.QtWidgets import QLabel, QPushButton, QWidget, QHBoxLayout, QFileDialog, QMessageBox
@@ -21,10 +22,14 @@ class EditorLink(QWidget):
 
         self._label = QLabel(targetObject.filename)
         layout.addWidget(self._label)
-        self._button = QPushButton("Browse")
-        layout.addWidget(self._button)
 
-        self._button.clicked.connect(self._chooseFile)
+        openButton = self._editorGenerator.createButton(Icons.Open)
+        openButton.clicked.connect(self._chooseFile)
+        layout.addWidget(openButton)
+
+        gotoButton = self._editorGenerator.createButton(Icons.Goto)
+        gotoButton.clicked.connect(self._goto)
+        layout.addWidget(gotoButton)
 
     def _chooseFile(self):
         rootPath = self._editorGenerator.serializer().root()
@@ -42,3 +47,8 @@ class EditorLink(QWidget):
                     self._targetObject.setObject(obj)
                     self.dataChanged.emit(self._targetObject)
                     self._label.setText(newPath)
+
+    def _goto(self):
+        target = self._label.text()
+        rootPath = self._editorGenerator.serializer().root()
+        self._editorGenerator.gotoObject.emit(os.path.join(rootPath, target))

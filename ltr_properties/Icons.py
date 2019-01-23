@@ -10,6 +10,8 @@ class Icons():
     ArrowDown = None
     ArrowRight = None
     Delete = None
+    Goto = None
+    Open = None
 
     @staticmethod
     def LoadIcons():
@@ -20,3 +22,5 @@ class Icons():
         Icons.ArrowDown = _LoadIcon("arrowDown")
         Icons.ArrowRight = _LoadIcon("arrowRight")
         Icons.Delete = _LoadIcon("delete")
+        Icons.Goto = _LoadIcon("goto")
+        Icons.Open = _LoadIcon("open")

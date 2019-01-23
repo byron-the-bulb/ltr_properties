@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout
-from PyQt5.QtCore import QSize
+from PyQt5.QtCore import QSize, QObject, pyqtSignal
 
 from .EditorBool import EditorBool
 from .EditorDict import EditorDict
@@ -16,8 +16,12 @@ from .HoverableButton import HoverableButton
 
 from .TypeUtils import checkType
 
-class EditorGenerator(object):
+class EditorGenerator(QObject):
+    gotoObject = pyqtSignal(str)
+
     def __init__(self, customEditors, labelWidth, spinBoxWidth, threadLock, serializer):
+        super().__init__()
+
         self._customEditors = customEditors
         self._labelWidth = labelWidth
         self._spinBoxWidth = spinBoxWidth

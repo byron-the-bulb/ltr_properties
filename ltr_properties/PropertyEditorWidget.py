@@ -31,6 +31,10 @@ class PropertyEditorWidget(QWidget):
         QVBoxLayout(self)
         self.layout().setContentsMargins(0, 0, 0, 0)
 
+    #TODO: This feels pretty gross.
+    def editorGenerator(self):
+        return self._editorGenerator
+
     def labelWidth(self):
         return self._labelWidth
 
@@ -70,8 +74,8 @@ class PropertyEditorWidget(QWidget):
         clearLayout(self.layout())
 
         if self._targetObject:
-            editorGenerator = EditorGenerator(self._customEditors, self._labelWidth, self._spinBoxWidth, self._threadLock, self._serializer)
-            editor = editorGenerator.createWidget(self._targetObject)
+            self._editorGenerator = EditorGenerator(self._customEditors, self._labelWidth, self._spinBoxWidth, self._threadLock, self._serializer)
+            editor = self._editorGenerator.createWidget(self._targetObject)
             if hasattr(editor, "dataChanged"):
                 editor.dataChanged.connect(self._dataChanged)
             self.layout().addWidget(editor)

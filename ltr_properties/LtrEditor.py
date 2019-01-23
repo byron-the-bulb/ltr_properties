@@ -3,6 +3,7 @@ from .PropertyEditorWidget import PropertyEditorWidget
 from .Serializer import Serializer
 
 import threading
+import os
 
 from PyQt5.QtWidgets import QWidget, QTabWidget, QHBoxLayout, QVBoxLayout, QScrollArea
 
@@ -31,8 +32,9 @@ class LtrEditor(QWidget):
         mainLayout.addWidget(self._tabWidget)
 
         self._customEditorMappings = {}
+        self._tabPaths = []
 
-    def addTargetObject(self, obj, name, dataChangeCallback=None):
+    def addTargetObject(self, obj, name, path, dataChangeCallback=None):
         scrollArea = QScrollArea()
 
         pe = PropertyEditorWidget(self._serializer)
@@ -41,12 +43,17 @@ class LtrEditor(QWidget):
             pe.registerCustomEditor(objType, editType)
         pe.setTargetObject(obj)
 
+        pe.editorGenerator().gotoObject.connect(self._onGotoObject)
+
         scrollArea.setWidget(pe)
 
         if dataChangeCallback:
             pe.dataChanged.connect(dataChangeCallback)
 
+        scrollArea.path = path
+
         self._tabWidget.addTab(scrollArea, name)
+        self._tabPaths.append(path)
 
     def addCustomEditorMapping(self, objType, editorType):
         self._customEditorMappings[objType] = editorType
@@ -60,6 +67,17 @@ class LtrEditor(QWidget):
     def threadLock(self):
         return self._threadLock
 
+    def _onGotoObject(self, path):
+        name = os.path.basename(path).replace(".json", "")
+        self._fileActivated(name, path)
+
     def _fileActivated(self, name, path):
+        path = os.path.abspath(path)
         obj = self._serializer.load(path)
-        self.addTargetObject(obj, name)
+        for tabIndex in range(self._tabWidget.count()):
+            if self._tabPaths[tabIndex] == path:
+                self._tabWidget.setCurrentIndex(tabIndex)
+                return
+
+        self.addTargetObject(obj, name, path)
+        self._tabWidget.setCurrentIndex(self._tabWidget.count() - 1)
