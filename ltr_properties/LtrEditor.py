@@ -5,7 +5,8 @@ from .Serializer import Serializer
 import threading
 import os
 
-from PyQt5.QtWidgets import QWidget, QTabWidget, QHBoxLayout, QVBoxLayout, QScrollArea
+from PyQt5.QtWidgets import QWidget, QTabWidget, QHBoxLayout, QVBoxLayout, QScrollArea, QShortcut
+from PyQt5.QtGui import QKeySequence
 
 class LtrEditor(QWidget):
     def __init__(self, root, module, threadLock=threading.Lock(), parent=None):
@@ -23,12 +24,15 @@ class LtrEditor(QWidget):
         self._objectTree.setSizePolicy(sizePolicy)
         mainLayout.addWidget(self._objectTree)
 
-        self._objectTree.fileActivated.connect(self._fileActivated)
+        self._objectTree.fileActivated.connect(self._openFile)
 
         self._tabWidget = QTabWidget()
         sizePolicy = self._tabWidget.sizePolicy()
         sizePolicy.setHorizontalStretch(2)
         self._tabWidget.setSizePolicy(sizePolicy)
+        self._tabWidget.setTabsClosable(True)
+        self._tabWidget.tabCloseRequested.connect(self._onTabCloseRequested)
+        self._closeTabShortcut = QShortcut(QKeySequence("Ctrl+W"), self, self._onCloseCurrentTab)
         mainLayout.addWidget(self._tabWidget)
 
         self._customEditorMappings = {}
@@ -69,9 +73,17 @@ class LtrEditor(QWidget):
 
     def _onGotoObject(self, path):
         name = os.path.basename(path).replace(".json", "")
-        self._fileActivated(name, path)
+        self._openFile(name, path)
 
-    def _fileActivated(self, name, path):
+    def _onCloseCurrentTab(self):
+        if self._tabWidget.count() > 0: 
+            self._onTabCloseRequested(self._tabWidget.currentIndex())
+
+    def _onTabCloseRequested(self, index):
+        self._tabWidget.removeTab(index)
+        del self._tabPaths[index]
+
+    def _openFile(self, name, path):
         path = os.path.abspath(path)
         obj = self._serializer.load(path)
         for tabIndex in range(self._tabWidget.count()):
@@ -81,3 +93,4 @@ class LtrEditor(QWidget):
 
         self.addTargetObject(obj, name, path)
         self._tabWidget.setCurrentIndex(self._tabWidget.count() - 1)
+        self._tabWidget.setFocus()
