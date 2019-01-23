@@ -12,10 +12,12 @@ import threading
 class PropertyEditorWidget(QWidget):
     dataChanged = pyqtSignal()
 
-    def __init__(self, targetObject=None, labelWidth=100, spinBoxWidth=70, customEditors={}):
+    def __init__(self, serializer, targetObject=None, labelWidth=100, spinBoxWidth=70, customEditors={}):
         Icons.LoadIcons()
 
         super().__init__()
+
+        self._serializer = serializer
         
         self._labelWidth = labelWidth
         self._spinBoxWidth = spinBoxWidth
@@ -68,7 +70,7 @@ class PropertyEditorWidget(QWidget):
         clearLayout(self.layout())
 
         if self._targetObject:
-            editorGenerator = EditorGenerator(self._customEditors, self._labelWidth, self._spinBoxWidth, self._threadLock)
+            editorGenerator = EditorGenerator(self._customEditors, self._labelWidth, self._spinBoxWidth, self._threadLock, self._serializer)
             editor = editorGenerator.createWidget(self._targetObject)
             if hasattr(editor, "dataChanged"):
                 editor.dataChanged.connect(self._dataChanged)

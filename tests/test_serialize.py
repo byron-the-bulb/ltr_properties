@@ -15,8 +15,9 @@ class Bar:
         self.b = self.b + " addition"
 
 def roundTripSerialize(obj):
-    serialized = ltr_properties.Serializer.encode(obj)
-    deserialized = ltr_properties.Serializer.decode(serialized, sys.modules[__name__])
+    serializer = ltr_properties.Serializer("", sys.modules[__name__])
+    serialized = serializer.encode(obj)
+    deserialized = serializer.decode(serialized)
     assert(deserialized == obj)
 
 def slotsEqual(objA, objB):
@@ -48,7 +49,8 @@ def testSerializePostLoad():
     bar = Bar()
     bar.a = 5
     bar.b = "Test"
-    serialized = ltr_properties.Serializer.encode(bar)
-    deserialized = ltr_properties.Serializer.decode(serialized, sys.modules[__name__])
+    serializer = ltr_properties.Serializer("", sys.modules[__name__])
+    serialized = serializer.encode(bar)
+    deserialized = serializer.decode(serialized)
     assert(deserialized.a == bar.a + 1)
     assert(deserialized.b == bar.b + " addition")

@@ -90,24 +90,14 @@ class Foo(object):
     def postLoad(self):
         printLoadedClass(self)
 
-def onDataChanged(obj):
-    ltr_properties.Serializer.save(filename, obj, indent=3)
-
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
     currentModule = sys.modules[__name__]
 
-    foo = None
-    try:
-        foo = ltr_properties.Serializer.load(filename, currentModule)
-    except (FileNotFoundError, json.decoder.JSONDecodeError):
-        foo = Foo()
-
-    ltrEditor = ltr_properties.LtrEditor("data")
+    ltrEditor = ltr_properties.LtrEditor("data", currentModule)
     ltrEditor.addCustomEditorMapping(Color, ltr_properties.EditorColor)
     ltrEditor.addCustomEditorMapping(Vector, ltr_properties.EditorSlottedClassHorizontal)
-    ltrEditor.addTargetObject(foo, "Foo", lambda: onDataChanged(foo))
 
     ltrEditor.setGeometry(300, 200, 900, 900)
     ltrEditor.setWindowTitle('LtRandolph Property Editor')

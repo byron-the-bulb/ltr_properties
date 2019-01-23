@@ -1,15 +1,18 @@
 from .ObjectTree import ObjectTree
 from .PropertyEditorWidget import PropertyEditorWidget
+from .Serializer import Serializer
 
 import threading
 
 from PyQt5.QtWidgets import QWidget, QTabWidget, QHBoxLayout, QVBoxLayout, QScrollArea
 
 class LtrEditor(QWidget):
-    def __init__(self, root, threadLock=threading.Lock(), parent=None):
+    def __init__(self, root, module, threadLock=threading.Lock(), parent=None):
         super().__init__(parent)
 
         self._threadLock = threadLock
+
+        self._serializer = Serializer(root, module)
 
         mainLayout = QHBoxLayout(self)
 
@@ -18,6 +21,8 @@ class LtrEditor(QWidget):
         sizePolicy.setHorizontalStretch(1)
         self._objectTree.setSizePolicy(sizePolicy)
         mainLayout.addWidget(self._objectTree)
+
+        self._objectTree.fileActivated.connect(self._fileActivated)
 
         self._tabWidget = QTabWidget()
         sizePolicy = self._tabWidget.sizePolicy()
@@ -30,7 +35,7 @@ class LtrEditor(QWidget):
     def addTargetObject(self, obj, name, dataChangeCallback=None):
         scrollArea = QScrollArea()
 
-        pe = PropertyEditorWidget()
+        pe = PropertyEditorWidget(self._serializer)
         pe.setThreadLock(self._threadLock)
         for objType, editType in self._customEditorMappings.items():
             pe.registerCustomEditor(objType, editType)
@@ -54,3 +59,7 @@ class LtrEditor(QWidget):
 
     def threadLock(self):
         return self._threadLock
+
+    def _fileActivated(self, name, path):
+        obj = self._serializer.load(path)
+        self.addTargetObject(obj, name)

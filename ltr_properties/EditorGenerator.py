@@ -5,20 +5,24 @@ from .EditorBool import EditorBool
 from .EditorDict import EditorDict
 from .EditorFloat import EditorFloat
 from .EditorInt import EditorInt
+from .EditorLink import EditorLink
 from .EditorList import EditorList
 from .EditorSlottedClass import EditorSlottedClass
 from .EditorString import EditorString
+
+from .Link import Link
 
 from .HoverableButton import HoverableButton
 
 from .TypeUtils import checkType
 
 class EditorGenerator(object):
-    def __init__(self, customEditors, labelWidth, spinBoxWidth, threadLock):
+    def __init__(self, customEditors, labelWidth, spinBoxWidth, threadLock, serializer):
         self._customEditors = customEditors
         self._labelWidth = labelWidth
         self._spinBoxWidth = spinBoxWidth
         self._threadLock = threadLock
+        self._serializer = serializer
 
         self._preLabelWidth = 24
         self._layoutSpacing = 4
@@ -43,6 +47,8 @@ class EditorGenerator(object):
             valueEditor = EditorFloat(self, value, name, typeHint)
         elif valType == str:
             valueEditor = EditorString(self, value, name, typeHint)
+        elif valType == Link:
+            valueEditor = EditorLink(self, value, name, typeHint)
         elif hasattr(value, "__slots__"):
             valueEditor = EditorSlottedClass(self, value, name, typeHint)
         elif valType == list:
@@ -73,6 +79,9 @@ class EditorGenerator(object):
 
     def preLabelWidth(self):
         return self._preLabelWidth
+
+    def serializer(self):
+        return self._serializer
 
     def spinBoxWidth(self):
         return self._spinBoxWidth

@@ -1,18 +1,20 @@
 from .Names import Names
-from . import Serializer
 from typing import TypeVar, Generic
 
 T = TypeVar("T")
 
 class Link(Generic[T]):
-    __slots__ = "filename", "_object", Names.loadModule
+    __slots__ = "filename", "_object", Names.serializer
     def __init__(self):
         self._object = None
         self.filename = ""
 
     def postLoad(self):
         if self.filename and len(self.filename) > 0:
-            self._object = Serializer.Serializer.load(self.filename, getattr(self, Names.loadModule))
+            self._object = getattr(self, Names.serializer).load(self.filename)
+
+    def setObject(self, obj):
+        self._object = obj
 
     def __getattr__(self, name):
         if not name in Link.__slots__ and self._object:

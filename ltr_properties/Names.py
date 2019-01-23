@@ -1,3 +1,3 @@
 class Names():
-    loadModule = "_loadModule"
+    serializer = "_serializer"
     postLoadMethod = "postLoad"
