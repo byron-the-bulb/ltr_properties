@@ -7,7 +7,7 @@ import threading
 import os
 
 from PyQt5.QtCore import QSize
-from PyQt5.QtWidgets import QWidget, QTabWidget, QHBoxLayout, QVBoxLayout, QScrollArea, QShortcut, QPushButton
+from PyQt5.QtWidgets import QWidget, QTabWidget, QHBoxLayout, QVBoxLayout, QScrollArea, QShortcut, QPushButton, QMessageBox
 from PyQt5.QtGui import QKeySequence
 
 class LtrEditor(QWidget):
@@ -62,11 +62,12 @@ class LtrEditor(QWidget):
         self._tabWidget = QTabWidget()
         self._tabWidget.setTabsClosable(True)
         self._tabWidget.tabCloseRequested.connect(self._onTabCloseRequested)
+        self._tabWidget.currentChanged.connect(self._updateDirtyState)
         self._closeTabShortcut = QShortcut(QKeySequence("Ctrl+W"), self, self._onCloseCurrentTab)
         rightLayout.addWidget(self._tabWidget)
 
         self._customEditorMappings = {}
-        self._tabPaths = []
+        self._tabInfo = []
 
     def addTargetObject(self, obj, name, path, dataChangeCallback=None):
         scrollArea = QScrollArea()
@@ -84,8 +85,12 @@ class LtrEditor(QWidget):
         if dataChangeCallback:
             pe.dataChanged.connect(dataChangeCallback)
 
+        pe.dataChanged.connect(lambda: self._markTabDirty(path))
+
+        tabInfo = {"path": path, "dirty": False}
+        self._tabInfo.append(tabInfo)
+
         self._tabWidget.addTab(scrollArea, name)
-        self._tabPaths.append(path)
 
     def addCustomEditorMapping(self, objType, editorType):
         self._customEditorMappings[objType] = editorType
@@ -99,6 +104,15 @@ class LtrEditor(QWidget):
     def threadLock(self):
         return self._threadLock
 
+    def _markTabDirty(self, path):
+        for tabIndex, info in enumerate(self._tabInfo):
+            if info["path"] == path and not info["dirty"]:
+                info["dirty"] = True
+
+                tabText = self._tabWidget.tabText(tabIndex)
+                self._tabWidget.setTabText(tabIndex, tabText + "*")
+                self._updateDirtyState()
+
     def _onGotoObject(self, path):
         name = os.path.basename(path).replace(".json", "")
         self._openFile(name, path)
@@ -109,28 +123,62 @@ class LtrEditor(QWidget):
 
     def _onRevertClicked(self):
         if self._tabWidget.currentIndex() >= 0:
-            path = self._tabPaths[self._tabWidget.currentIndex()]
+            path = self._tabInfo[self._tabWidget.currentIndex()]["path"]
             targetObject = self._serializer.load(path)
             self._tabWidget.currentWidget().widget().setTargetObject(targetObject)
 
     def _onSaveClicked(self):
-        if self._tabWidget.currentIndex() >= 0:
-            path = self._tabPaths[self._tabWidget.currentIndex()]
-            targetObject = self._tabWidget.currentWidget().widget().targetObject()
-            self._serializer.save(path, targetObject)
+        tabIndex = self._tabWidget.currentIndex()
+        if tabIndex >= 0:
+            self._saveTab(tabIndex)
 
     def _onTabCloseRequested(self, index):
-        self._tabWidget.removeTab(index)
-        del self._tabPaths[index]
+        actuallyClose = True
+        tabInfo = self._tabInfo[index]
+        if tabInfo["dirty"]:
+            reply = QMessageBox.question(self, "Save?", "Save changes to " + tabInfo["path"] + "?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+            
+            if reply == QMessageBox.Yes:
+                self._saveTab(index)
+            elif reply == QMessageBox.Cancel:
+                actuallyClose = False
+
+        if actuallyClose:
+            self._tabWidget.removeTab(index)
+            del self._tabInfo[index]
 
     def _openFile(self, name, path):
         path = os.path.abspath(path)
         obj = self._serializer.load(path)
-        for tabIndex in range(self._tabWidget.count()):
-            if self._tabPaths[tabIndex] == path:
-                self._tabWidget.setCurrentIndex(tabIndex)
-                return
 
-        self.addTargetObject(obj, name, path)
-        self._tabWidget.setCurrentIndex(self._tabWidget.count() - 1)
+        foundIndex = -1
+        for tabIndex in range(self._tabWidget.count()):
+            if self._tabInfo[tabIndex]["path"] == path:
+                foundIndex = tabIndex
+                break
+
+        if foundIndex == -1:
+            foundIndex = self._tabWidget.count()
+            self.addTargetObject(obj, name, path)
+
+        self._tabWidget.setCurrentIndex(foundIndex)
         self._tabWidget.setFocus()
+        self._updateDirtyState()
+
+    def _saveTab(self, tabIndex):
+        tabInfo = self._tabInfo[tabIndex]
+        path = tabInfo["path"]
+        pe = self._tabWidget.widget(tabIndex).widget()
+        targetObject = pe.targetObject()
+        self._serializer.save(path, targetObject)
+        tabText = self._tabWidget.tabText(tabIndex)
+        self._tabWidget.setTabText(tabIndex, tabText.replace("*", ""))
+        tabInfo["dirty"] = False
+        self._updateDirtyState()
+
+    def _updateDirtyState(self):
+        dirty = self._tabInfo[self._tabWidget.currentIndex()]["dirty"]
+        self._saveButton.setEnabled(dirty)
+        self._revertButton.setEnabled(dirty)
+        self._saveShortcut.setEnabled(dirty)

@@ -3,6 +3,7 @@ from typing import TypeVar, Generic
 
 T = TypeVar("T")
 
+#TODO: Avoid infinite recursion by deduping links
 class Link(Generic[T]):
     __slots__ = "filename", "_object", Names.serializer
     def __init__(self):
