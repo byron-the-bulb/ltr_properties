@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QWidget, QTabWidget, QHBoxLayout, QVBoxLayout, QScro
 from PyQt5.QtGui import QKeySequence
 
 class LtrEditor(QWidget):
-    def __init__(self, root, module, threadLock=threading.Lock(), parent=None):
+    def __init__(self, root, module, serializerIndent = None, threadLock=threading.Lock(), parent=None):
         super().__init__(parent)
 
         # Make sure icons are loaded before we use them.
@@ -19,7 +19,7 @@ class LtrEditor(QWidget):
 
         self._threadLock = threadLock
 
-        self._serializer = Serializer(root, module)
+        self._serializer = Serializer(root, module, indent=serializerIndent)
 
         mainLayout = QHBoxLayout(self)
 
@@ -46,6 +46,7 @@ class LtrEditor(QWidget):
 
         self._saveButton = QPushButton(Icons.Save, "")
         self._saveButton.clicked.connect(self._onSaveClicked)
+        self._saveShortcut = QShortcut(QKeySequence("Ctrl+S"), self, self._onSaveClicked)
         self._saveButton.setFixedSize(24, 24)
         self._saveButton.setIconSize(QSize(24, 24))
         self._buttonLayout.addWidget(self._saveButton)

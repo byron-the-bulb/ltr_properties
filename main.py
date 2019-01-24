@@ -95,7 +95,7 @@ if __name__ == '__main__':
 
     currentModule = sys.modules[__name__]
 
-    ltrEditor = ltr_properties.LtrEditor("data", currentModule)
+    ltrEditor = ltr_properties.LtrEditor("data", currentModule, serializerIndent=4)
     ltrEditor.addCustomEditorMapping(Color, ltr_properties.EditorColor)
     ltrEditor.addCustomEditorMapping(Vector, ltr_properties.EditorSlottedClassHorizontal)
 
