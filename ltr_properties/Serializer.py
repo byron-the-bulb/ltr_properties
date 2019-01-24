@@ -34,9 +34,12 @@ class Serializer():
             slots = TypeUtils.getAllSlots(o)
 
             if slots != None:
+                defaultObj = type(o)()
+
                 contents = {}
                 for key in slots:
-                    if not key.startswith("_") and hasattr(o, key):
+                    if (not key.startswith("_") and hasattr(o, key) and
+                        (not hasattr(defaultObj, key) or getattr(o, key) != getattr(defaultObj, key))):
                         contents[key] = getattr(o, key)
                 return { type(o).__name__ : contents }
 
