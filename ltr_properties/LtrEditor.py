@@ -69,6 +69,8 @@ class LtrEditor(QWidget):
         self._customEditorMappings = {}
         self._tabInfo = []
 
+        self._updateDirtyState()
+
     def addTargetObject(self, obj, name, path, dataChangeCallback=None):
         scrollArea = QScrollArea()
 
@@ -178,7 +180,9 @@ class LtrEditor(QWidget):
         self._updateDirtyState()
 
     def _updateDirtyState(self):
-        dirty = self._tabInfo[self._tabWidget.currentIndex()]["dirty"]
+        dirty = False
+        if self._tabWidget.currentIndex() >= 0:
+            dirty = self._tabInfo[self._tabWidget.currentIndex()]["dirty"]
         self._saveButton.setEnabled(dirty)
         self._revertButton.setEnabled(dirty)
         self._saveShortcut.setEnabled(dirty)
