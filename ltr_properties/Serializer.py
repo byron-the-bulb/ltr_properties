@@ -6,9 +6,9 @@ from . import TypeUtils
 from .Names import Names
 
 class Serializer():
-    def __init__(self, root, module, indent=None):
+    def __init__(self, root, classDict, indent=None):
         self._root = root
-        self._module = module
+        self._classDict = classDict
         self._encoder = Serializer.__Encoder(indent=indent)
         self._decoder = json.JSONDecoder(object_hook=self._decodeObjectHook)
 
@@ -44,11 +44,10 @@ class Serializer():
                 return { type(o).__name__ : contents }
 
     def _decodeObjectHook(self, jsonObject):
-        if self._module and len(jsonObject) == 1:
+        if len(jsonObject) == 1:
             className = next(iter(jsonObject.keys()))
-            checkedModules = []
-            classType = TypeUtils.getClassType(className, self._module, checkedModules)
-            if classType:
+            if className in self._classDict:
+                classType = self._classDict[className]
                 typeHints = typing.get_type_hints(classType)
                 classObj = classType()
                 for k, v in jsonObject[className].items():

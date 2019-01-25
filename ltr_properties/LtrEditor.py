@@ -2,7 +2,9 @@ from .ObjectTree import ObjectTree
 from .Icons import Icons
 from .PropertyEditorWidget import PropertyEditorWidget
 from .Serializer import Serializer
+from . import TypeUtils
 
+import inspect
 import threading
 import os
 
@@ -11,7 +13,7 @@ from PyQt5.QtWidgets import QWidget, QTabWidget, QHBoxLayout, QVBoxLayout, QScro
 from PyQt5.QtGui import QKeySequence
 
 class LtrEditor(QWidget):
-    def __init__(self, root, module, serializerIndent = None, threadLock=threading.Lock(), parent=None):
+    def __init__(self, root, classModule, classModuleRootFolders=None, serializerIndent = None, threadLock=threading.Lock(), parent=None):
         super().__init__(parent)
 
         # Make sure icons are loaded before we use them.
@@ -19,15 +21,21 @@ class LtrEditor(QWidget):
 
         self._threadLock = threadLock
 
-        self._serializer = Serializer(root, module, indent=serializerIndent)
+        if classModuleRootFolders == None:
+            classModuleRootFolders = [os.path.dirname(inspect.getfile(classModule))]
+
+        classDict = TypeUtils.getClasses(classModule, classModuleRootFolders)
+
+        self._serializer = Serializer(root, classDict, indent=serializerIndent)
 
         mainLayout = QHBoxLayout(self)
 
-        self._objectTree = ObjectTree(root)
+        self._objectTree = ObjectTree(root, classDict)
         sizePolicy = self._objectTree.sizePolicy()
         sizePolicy.setHorizontalStretch(1)
         self._objectTree.setSizePolicy(sizePolicy)
         self._objectTree.fileActivated.connect(self._openFile)
+        self._objectTree.pathDeleted.connect(self._onPathDeleted)
         mainLayout.addWidget(self._objectTree)
 
         rightPanel = QWidget()
@@ -122,6 +130,12 @@ class LtrEditor(QWidget):
     def _onCloseCurrentTab(self):
         if self._tabWidget.count() > 0: 
             self._onTabCloseRequested(self._tabWidget.currentIndex())
+
+    def _onPathDeleted(self, path):
+        for i in range(len(self._tabInfo) - 1, -1, -1):
+            if path in self._tabInfo[i]["path"]:
+                del self._tabInfo[i]
+                self._tabWidget.removeTab(i)
 
     def _onRevertClicked(self):
         if self._tabWidget.currentIndex() >= 0:

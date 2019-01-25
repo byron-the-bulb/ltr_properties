@@ -17,23 +17,35 @@ def getAllSlots(obj):
                     slots.append(slot)
     return slots
 
-def getClassType(className, module, checkedModules):
-    # See if we find the class in this namespace.
-    if hasattr(module, className):
-        maybeClassType = getattr(module, className)
-        if inspect.isclass(maybeClassType):
-            return maybeClassType
+def getClasses(module, moduleRootFolders):
+    classes = {"Link": Link.Link}
+    checkedModules = [module]
+    _getClassesRecurse(module, moduleRootFolders, classes, checkedModules)
+    return classes
 
-    # Otherwise, recurse into any modules we find.
+def _getClassesRecurse(module, moduleRootFolders, classes, checkedModules):
     for k, v in module.__dict__.items():
-        if inspect.ismodule(v) and not k.startswith("_") and not k in checkedModules:
-            checkedModules.append(k)
-            maybeClassType = getClassType(className, v, checkedModules)
-            if maybeClassType:
-                return maybeClassType
+        if k.startswith("_"):
+            continue
+        elif inspect.isclass(v):
+            if _isModuleOrClassFromRootFolder(v, moduleRootFolders):
+                if k in classes and classes[k] != v:
+                    raise TypeError("Multiple classes share the name " + k + "\n" + str(v) + "\n" + str(classes[k]))
+                classes[k] = v
+        elif inspect.ismodule(v) and not k in checkedModules:
+            if _isModuleOrClassFromRootFolder(v, moduleRootFolders):
+                checkedModules.append(k)
+                _getClassesRecurse(v, moduleRootFolders, classes, checkedModules)
 
-    # No dice.
-    return None
+def _isModuleOrClassFromRootFolder(obj, moduleRootFolders):
+    try:
+        objFile = inspect.getfile(obj)
+        for rootFolder in moduleRootFolders:
+            if rootFolder in objFile:
+                return True
+    except:
+        pass
+    return False
 
 def checkType(value, typeHint, path):
     success = True
