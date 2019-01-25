@@ -1,3 +1,4 @@
+import inspect
 import json
 import os
 import typing
@@ -8,6 +9,12 @@ from .Names import Names
 class Serializer():
     def __init__(self, root, classDict, indent=None):
         self._root = root
+
+        # Allow people to pass in a module and recover from that.
+        if inspect.ismodule(classDict):
+            classModuleRootFolders = [os.path.dirname(inspect.getfile(classDict))]
+            classDict = TypeUtils.getClasses(classDict, classModuleRootFolders)
+
         self._classDict = classDict
         self._encoder = Serializer.__Encoder(indent=indent)
         self._decoder = json.JSONDecoder(object_hook=self._decodeObjectHook)
