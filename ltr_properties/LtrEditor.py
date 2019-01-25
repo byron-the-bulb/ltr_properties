@@ -8,11 +8,13 @@ import inspect
 import threading
 import os
 
-from PyQt5.QtCore import QSize
+from PyQt5.QtCore import QSize, pyqtSignal
 from PyQt5.QtWidgets import QWidget, QTabWidget, QHBoxLayout, QVBoxLayout, QScrollArea, QShortcut, QPushButton, QMessageBox
 from PyQt5.QtGui import QKeySequence
 
 class LtrEditor(QWidget):
+    objectChanged = pyqtSignal(str)
+
     def __init__(self, root, classModule, classModuleRootFolders=None, serializerIndent = None, threadLock=threading.Lock(), parent=None):
         super().__init__(parent)
 
@@ -96,6 +98,9 @@ class LtrEditor(QWidget):
             pe.dataChanged.connect(dataChangeCallback)
 
         pe.dataChanged.connect(lambda: self._markTabDirty(path))
+
+        relativePath = os.path.relpath(path, self._objectTree.rootPath())
+        pe.dataChanged.connect(lambda: self.objectChanged.emit(relativePath))
 
         tabInfo = {"path": path, "dirty": False}
         self._tabInfo.append(tabInfo)
