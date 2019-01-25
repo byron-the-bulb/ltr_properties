@@ -36,6 +36,10 @@ class EditorLink(QWidget):
         filename = QFileDialog.getOpenFileName(self, self._name, rootPath, "*.json")
         if filename[0]:
             newPath = os.path.relpath(filename[0], rootPath)
+            if ".." in newPath:
+                QMessageBox.warning(self, "Invalid Path", os.path.abspath(newPath) + "\n\nis outside the root path\n\n" + os.path.abspath(rootPath))
+                return
+
             obj = self._editorGenerator.serializer().load(newPath)
             
             try:
