@@ -54,5 +54,4 @@ class EditorLink(QWidget):
 
     def _goto(self):
         target = self._label.text()
-        rootPath = self._editorGenerator.serializer().root()
-        self._editorGenerator.gotoObject.emit(os.path.join(rootPath, target))
+        self._editorGenerator.gotoObject.emit(target)
