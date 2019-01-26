@@ -36,7 +36,7 @@ class LtrEditor(QWidget):
         sizePolicy = self._objectTree.sizePolicy()
         sizePolicy.setHorizontalStretch(1)
         self._objectTree.setSizePolicy(sizePolicy)
-        self._objectTree.fileActivated.connect(self._openFile)
+        self._objectTree.fileActivated.connect(self.openFile)
         self._objectTree.pathDeleted.connect(self._onPathDeleted)
         mainLayout.addWidget(self._objectTree)
 
@@ -130,7 +130,7 @@ class LtrEditor(QWidget):
 
     def _onGotoObject(self, path):
         name = os.path.basename(path).replace(".json", "")
-        self._openFile(name, path)
+        self.openFile(name, path)
 
     def _onCloseCurrentTab(self):
         if self._tabWidget.count() > 0: 
@@ -169,7 +169,7 @@ class LtrEditor(QWidget):
             self._tabWidget.removeTab(index)
             del self._tabInfo[index]
 
-    def _openFile(self, name, path):
+    def openFile(self, name, path, dataChangeCallback=None):
         path = os.path.abspath(path)
         obj = self._serializer.load(path)
 
@@ -181,11 +181,13 @@ class LtrEditor(QWidget):
 
         if foundIndex == -1:
             foundIndex = self._tabWidget.count()
-            self.addTargetObject(obj, name, path)
+            self.addTargetObject(obj, name, path, dataChangeCallback)
 
         self._tabWidget.setCurrentIndex(foundIndex)
         self._tabWidget.setFocus()
         self._updateDirtyState()
+
+        return obj
 
     def _saveTab(self, tabIndex):
         tabInfo = self._tabInfo[tabIndex]
