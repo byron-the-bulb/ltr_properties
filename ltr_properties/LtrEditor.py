@@ -170,7 +170,6 @@ class LtrEditor(QWidget):
             del self._tabInfo[index]
 
     def openFile(self, name, path, dataChangeCallback=None):
-        path = os.path.abspath(path)
         obj = self._serializer.load(path)
 
         foundIndex = -1
