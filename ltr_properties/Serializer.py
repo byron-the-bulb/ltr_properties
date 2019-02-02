@@ -43,12 +43,17 @@ class Serializer():
             if slots != None:
                 defaultObj = type(o)()
 
+                className = type(o).__name__
+
                 contents = {}
                 for key in slots:
                     if (not key.startswith("_") and hasattr(o, key) and
                         (not hasattr(defaultObj, key) or getattr(o, key) != getattr(defaultObj, key))):
                         contents[key] = getattr(o, key)
-                return { type(o).__name__ : contents }
+                    elif (key == Names.saveAsClass):
+                        className = getattr(o, key)
+
+                return { className : contents }
 
     def _decodeObjectHook(self, jsonObject):
         if len(jsonObject) == 1:
