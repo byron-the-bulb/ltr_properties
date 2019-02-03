@@ -28,7 +28,7 @@ class EditorSlottedClass(CompoundEditor):
     def _getHeaderWidgets(self):
         if self._typeHint and len(self._typeHint.__subclasses__()) > 0:
             classSelector = QComboBox()
-            for classType in self._getSelectableClasses():
+            for classType in self._getSelectableClasses(self._typeHint):
                 classSelector.addItem(classType.__name__)
 
             classSelector.setCurrentText(type(self._targetObject).__name__)
@@ -38,10 +38,10 @@ class EditorSlottedClass(CompoundEditor):
         else:
             return []
 
-    def _getSelectableClasses(self):
-        yield self._typeHint
-        for subclass in self._typeHint.__subclasses__():
-            yield subclass
+    def _getSelectableClasses(self, typeHint):
+        yield typeHint
+        for subclass in typeHint.__subclasses__():
+            yield from self._getSelectableClasses(subclass)
 
     def _classSelected(self, newClassName):
         if newClassName == type(self._targetObject).__name__:
@@ -49,7 +49,7 @@ class EditorSlottedClass(CompoundEditor):
 
         with self._editorGenerator.threadLock():
             newClass = None
-            for c in self._getSelectableClasses():
+            for c in self._getSelectableClasses(self._typeHint):
                 if c.__name__ == newClassName:
                     newClass = c
 
