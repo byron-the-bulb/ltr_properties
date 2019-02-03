@@ -8,7 +8,7 @@ from PyQt5.QtCore import pyqtSignal
 import os
 
 class EditorLink(QWidget):
-    dataChanged = pyqtSignal(int)
+    dataChanged = pyqtSignal(Link)
 
     def __init__(self, editorGenerator, targetObject:Link, name, typeHint):
         super().__init__()

@@ -83,7 +83,7 @@ class LtrEditor(QWidget):
 
         self._updateDirtyState()
 
-    def addTargetObject(self, obj, name, path, dataChangeCallback=None, additionalPaths=[]):
+    def addTargetObject(self, obj, name, path, dataChangeCallback=None, loadedPaths=[]):
         scrollArea = QScrollArea()
 
         pe = PropertyEditorWidget(self._serializer)
@@ -101,12 +101,11 @@ class LtrEditor(QWidget):
         # We want to make sure this data changed callback is called if this object or any of the other
         # objects it contains are changed. For example, if it has Links.
         if dataChangeCallback:
-            allPaths = [path]
-            allPaths.extend(additionalPaths)
-            for path in allPaths:
-                if not path in self._pathToDataChangedCallbacks:
-                    self._pathToDataChangedCallbacks[path] = []
-                self._pathToDataChangedCallbacks[path].append(dataChangeCallback)
+            paths = loadedPaths if len(loadedPaths) > 0 else [path]
+            for loadedPath in paths:
+                if not loadedPath in self._pathToDataChangedCallbacks:
+                    self._pathToDataChangedCallbacks[loadedPath] = []
+                self._pathToDataChangedCallbacks[loadedPath].append(dataChangeCallback)
 
         tabInfo = {"path": path, "dirty": False}
         self._tabInfo.append(tabInfo)

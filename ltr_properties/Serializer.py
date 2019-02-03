@@ -31,11 +31,13 @@ class Serializer():
     # Returns the loaded object, and a list of all filenames that were loaded in the process of loading it
     # (presumably from Link objects). This list can be used to connect signals for other objects changing.
     def loadWithFileList(self, filename):
-        # Each stack frame will wind up with the list of additional files that were loaded in the process of loading
+        # Each stack frame will wind up with the list of all files that were loaded in the process of loading
         # an object. The top of the stack is for the innermost object being loaded.
         for loadStackFrame in self._loadStack:
+            if filename in loadStackFrame:
+                raise Exception("Loop in data: " + filename + " already seen in " + str(loadStackFrame))
             loadStackFrame.append(filename) # Add ourselves to all loading stack frames.
-        self._loadStack.append([])
+        self._loadStack.append([filename])
 
         result = None
 
