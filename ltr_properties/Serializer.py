@@ -19,15 +19,37 @@ class Serializer():
         self._encoder = Serializer.__Encoder(indent=indent)
         self._decoder = json.JSONDecoder(object_hook=self._decodeObjectHook)
 
+        self._loadStack = []
+        self._loadedObjects = {}
+
     def decode(self, jsonStr):
         return self._decoder.decode(jsonStr)
 
     def encode(self, obj):
         return self._encoder.encode(obj)
     
+    # Returns the loaded object, and a list of all filenames that were loaded in the process of loading it
+    # (presumably from Link objects). This list can be used to connect signals for other objects changing.
+    def loadWithFileList(self, filename):
+        # Each stack frame will wind up with the list of additional files that were loaded in the process of loading
+        # an object. The top of the stack is for the innermost object being loaded.
+        for loadStackFrame in self._loadStack:
+            loadStackFrame.append(filename) # Add ourselves to all loading stack frames.
+        self._loadStack.append([])
+
+        result = None
+
+        if filename in self._loadedObjects:
+            result = self._loadedObjects[filename]
+        else:
+            with open(os.path.join(self._root, filename), 'r') as loadFile:
+                result = self.decode(loadFile.read())
+                self._loadedObjects[filename] = result
+                
+        return result, self._loadStack.pop()
+
     def load(self, filename):
-        with open(os.path.join(self._root, filename), 'r') as loadFile:
-            return self.decode(loadFile.read())
+        return self.loadWithFileList(filename)[0]
 
     def root(self):
         return self._root

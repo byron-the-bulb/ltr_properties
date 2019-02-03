@@ -79,9 +79,11 @@ class LtrEditor(QWidget):
         self._customEditorMappings = {}
         self._tabInfo = []
 
+        self._pathToDataChangedCallbacks = {}
+
         self._updateDirtyState()
 
-    def addTargetObject(self, obj, name, path, dataChangeCallback=None):
+    def addTargetObject(self, obj, name, path, dataChangeCallback=None, additionalPaths=[]):
         scrollArea = QScrollArea()
 
         pe = PropertyEditorWidget(self._serializer)
@@ -94,13 +96,17 @@ class LtrEditor(QWidget):
 
         scrollArea.setWidget(pe)
 
+        pe.dataChanged.connect(lambda: self._onDataChanged(path))
+
+        # We want to make sure this data changed callback is called if this object or any of the other
+        # objects it contains are changed. For example, if it has Links.
         if dataChangeCallback:
-            pe.dataChanged.connect(dataChangeCallback)
-
-        pe.dataChanged.connect(lambda: self._markTabDirty(path))
-
-        relativePath = os.path.relpath(path, self._objectTree.rootPath())
-        pe.dataChanged.connect(lambda: self.objectChanged.emit(relativePath))
+            allPaths = [path]
+            allPaths.extend(additionalPaths)
+            for path in allPaths:
+                if not path in self._pathToDataChangedCallbacks:
+                    self._pathToDataChangedCallbacks[path] = []
+                self._pathToDataChangedCallbacks[path].append(dataChangeCallback)
 
         tabInfo = {"path": path, "dirty": False}
         self._tabInfo.append(tabInfo)
@@ -127,6 +133,13 @@ class LtrEditor(QWidget):
                 tabText = self._tabWidget.tabText(tabIndex)
                 self._tabWidget.setTabText(tabIndex, tabText + "*")
                 self._updateDirtyState()
+
+    def _onDataChanged(self, path):
+        self._markTabDirty(path)
+        self.objectChanged.emit(path)
+        if path in self._pathToDataChangedCallbacks:
+            for callback in self._pathToDataChangedCallbacks[path]:
+                callback()
 
     def _onGotoObject(self, path):
         name = os.path.basename(path).replace(".json", "")
@@ -170,7 +183,7 @@ class LtrEditor(QWidget):
             del self._tabInfo[index]
 
     def openFile(self, name, path, dataChangeCallback=None):
-        obj = self._serializer.load(path)
+        obj, loadedFiles = self._serializer.loadWithFileList(path)
 
         foundIndex = -1
         for tabIndex in range(self._tabWidget.count()):
@@ -180,7 +193,7 @@ class LtrEditor(QWidget):
 
         if foundIndex == -1:
             foundIndex = self._tabWidget.count()
-            self.addTargetObject(obj, name, path, dataChangeCallback)
+            self.addTargetObject(obj, name, path, dataChangeCallback, loadedFiles)
 
         self._tabWidget.setCurrentIndex(foundIndex)
         self._tabWidget.setFocus()
