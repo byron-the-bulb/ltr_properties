@@ -86,6 +86,8 @@ class LtrEditor(QWidget):
     def addTargetObject(self, obj, name, path, dataChangeCallback=None, loadedPaths=[]):
         scrollArea = QScrollArea()
 
+        scrollArea.setWidgetResizable(True)
+
         pe = PropertyEditorWidget(self._serializer)
         pe.setThreadLock(self._threadLock)
         for objType, editType in self._customEditorMappings.items():
