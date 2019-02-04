@@ -14,7 +14,8 @@ class Link(Generic[T]):
         if self.filename and len(self.filename) > 0:
             self._object = getattr(self, Names.serializer).load(self.filename)
 
-    def setObject(self, obj):
+    def setObject(self, filename, obj):
+        self.filename = filename
         self._object = obj
 
     def __getattr__(self, name):

@@ -74,7 +74,7 @@ class PropertyEditorWidget(QWidget):
     def _initUI(self):
         clearLayout(self.layout())
 
-        if self._targetObject:
+        if self._targetObject != None:
             self._editorGenerator = EditorGenerator(self._customEditors, self._labelWidth, self._spinBoxWidth, self._threadLock, self._serializer)
             editor = self._editorGenerator.createWidget(self._targetObject)
             if hasattr(editor, "dataChanged"):

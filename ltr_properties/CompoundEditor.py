@@ -21,8 +21,13 @@ class CompoundEditor(QWidget):
         self._typeHint = typeHint
 
         self._widgetLayout = self._createLayout(name)
+
+        self._childWidgetMap = {}
         
         self._createWidgetsForObject()
+
+    def childWidget(self, path):
+        return self._childWidgetMap[path] if path in self._childWidgetMap else None
 
     # Should yield name, value, setter, typeHint for each property.
     def _getProperties(self):
@@ -40,6 +45,8 @@ class CompoundEditor(QWidget):
 
         for name, value, setter, typeHint in self._getProperties():
             editor = self._editorGenerator.createWidget(value, name, setter, typeHint=typeHint)
+
+            self._childWidgetMap[name] = editor
 
             if hasattr(editor, "dataChanged"):
                 editor.dataChanged.connect(self._dataChanged)

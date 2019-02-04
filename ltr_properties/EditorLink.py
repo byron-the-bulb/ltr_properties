@@ -23,13 +23,13 @@ class EditorLink(QWidget):
         self._label = QLabel(targetObject.filename)
         layout.addWidget(self._label)
 
-        openButton = self._editorGenerator.createButton(Icons.Open)
-        openButton.clicked.connect(self._chooseFile)
-        layout.addWidget(openButton)
+        self._openButton = self._editorGenerator.createButton(Icons.Open)
+        self._openButton.clicked.connect(self._onChooseFileClicked)
+        layout.addWidget(self._openButton)
 
-        gotoButton = self._editorGenerator.createButton(Icons.Goto)
-        gotoButton.clicked.connect(self._goto)
-        layout.addWidget(gotoButton)
+        self._gotoButton = self._editorGenerator.createButton(Icons.Goto)
+        self._gotoButton.clicked.connect(self._goto)
+        layout.addWidget(self._gotoButton)
 
     def _chooseFile(self):
         rootPath = self._editorGenerator.serializer().root()
@@ -38,8 +38,15 @@ class EditorLink(QWidget):
             newPath = os.path.relpath(filename[0], rootPath)
             if ".." in newPath:
                 QMessageBox.warning(self, "Invalid Path", os.path.abspath(newPath) + "\n\nis outside the root path\n\n" + os.path.abspath(rootPath))
-                return
+                return None
 
+            return newPath
+
+        return None
+
+    def _onChooseFileClicked(self):
+        newPath = self._chooseFile()
+        if newPath != None:
             obj = self._editorGenerator.serializer().load(newPath)
             
             try:
@@ -48,7 +55,7 @@ class EditorLink(QWidget):
                 QMessageBox.warning(self, "Type Error", str(ex))
             else:
                 with self._editorGenerator.threadLock():
-                    self._targetObject.setObject(obj)
+                    self._targetObject.setObject(newPath, obj)
                     self.dataChanged.emit(self._targetObject)
                     self._label.setText(newPath)
 

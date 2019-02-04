@@ -120,6 +120,12 @@ class LtrEditor(QWidget):
     def customEditorMappings(self):
         return self._customEditorMappings
 
+    def editor(self, path):
+        for tabIndex, info in enumerate(self._tabInfo):
+            if info["path"] == path:
+                return self._tabWidget.widget(tabIndex).widget().layout().itemAt(0).widget()
+        return None
+
     def objectTree(self):
         return self._objectTree
 
