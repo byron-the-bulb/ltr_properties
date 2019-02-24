@@ -37,6 +37,9 @@ class EditorGenerator(QObject):
             checkType(value, typeHint, name)
 
         valType = type(value)
+        # HACK: let us read ints from json as floats in a fairly inelegant way
+        if valType == int and typeHint == float:
+            valType = float
 
         # This set of elifs will either return a widget, or set this to a widget
         # that should then be connected to a setattr lambda to store the value.

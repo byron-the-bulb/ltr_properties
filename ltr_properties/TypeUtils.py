@@ -47,6 +47,13 @@ def _isModuleOrClassFromRootFolder(obj, moduleRootFolders):
         pass
     return False
 
+def basicTypeMatches(value, typeHint):
+    if isinstance(value, typeHint):
+        return True
+    elif typeHint == float and isinstance(value, int):
+        return True
+    return False
+
 def checkType(value, typeHint, path):
     success = True
     if hasattr(typeHint, "__origin__"):
@@ -58,7 +65,7 @@ def checkType(value, typeHint, path):
             success = _checkTypeLink(value, typeHint)
         else:
             raise NotImplementedError("Type checking not implemented for " + str(typeHint))
-    elif not isinstance(value, typeHint):
+    elif not basicTypeMatches(value, typeHint):
         success = False
     
     if not success:
@@ -90,7 +97,7 @@ def _checkTypeList(value, typeHint):
     else:
         elementType = getListElemTypeHint(typeHint)
         for element in value:
-            if not isinstance(element, elementType):
+            if not basicTypeMatches(element, elementType):
                 return False
     return True
 
@@ -100,9 +107,9 @@ def _checkTypeDict(value, typeHint):
     else:
         keyType, valueType = getDictKVTypeHints(typeHint)
         for k, v in value.items():
-            if not isinstance(k, keyType):
+            if not basicTypeMatches(k, keyType):
                 return False
-            if not isinstance(v, valueType):
+            if not basicTypeMatches(v, valueType):
                 return False
     return True
 

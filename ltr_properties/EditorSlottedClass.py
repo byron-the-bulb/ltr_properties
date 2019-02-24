@@ -21,7 +21,12 @@ class EditorSlottedClass(CompoundEditor):
             typeHint = typeHints[name] if name in typeHints else None
 
             if typeHint and value == None:
-                value = typeHint()
+                if typeHint.__origin__ == typing.Dict:
+                    value = {}
+                elif typeHint.__origin__ == typing.List:
+                    value = []
+                else:
+                    value = typeHint()
 
             yield name, value, setter, typeHint
 
