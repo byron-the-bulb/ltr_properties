@@ -26,6 +26,8 @@ class EditorSlottedClass(CompoundEditor):
                         value = {}
                     elif typeHint.__origin__ == typing.List:
                         value = []
+                    else:
+                        value = typeHint()
                 else:
                     value = typeHint()
 

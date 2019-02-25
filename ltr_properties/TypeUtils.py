@@ -1,6 +1,7 @@
 import typing
 import inspect
 from . import Link
+from enum import Enum
 
 def getAllSlots(obj):
     slots = None
@@ -51,6 +52,8 @@ def basicTypeMatches(value, typeHint):
     if isinstance(value, typeHint):
         return True
     elif typeHint == float and isinstance(value, int):
+        return True
+    elif issubclass(typeHint, Enum) and isinstance(value, str):
         return True
     return False
 

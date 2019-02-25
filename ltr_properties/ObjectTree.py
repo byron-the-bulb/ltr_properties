@@ -107,6 +107,8 @@ class ObjectTree(QTreeView):
             self.pathDeleted.emit(path)
 
     def _onActivated(self, index):
+        if self._model.isDir(index):
+            return
         path = os.path.relpath(self._model.filePath(index), self.rootPath())
         name = self._model.fileName(index)
         name = name.replace(".json", "")

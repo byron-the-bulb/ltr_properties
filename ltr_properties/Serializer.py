@@ -3,6 +3,8 @@ import json
 import os
 import typing
 
+from enum import Enum
+
 from . import TypeUtils
 from .Names import Names
 
@@ -78,6 +80,8 @@ class Serializer():
                         className = getattr(o, key)
 
                 return { className : contents }
+            elif isinstance(o, Enum):
+                return o.name
 
     def _decodeObjectHook(self, jsonObject):
         if len(jsonObject) == 1:
@@ -89,7 +93,7 @@ class Serializer():
                 for k, v in jsonObject[className].items():
                     if k in typeHints:
                         TypeUtils.checkType(v, typeHints[k], className + '.' + k)
-                    setattr(classObj, k, v)
+                    self._setattrOnObj(classObj, k, v, typeHints)
 
                 if Names.serializer in classType.__slots__:
                     setattr(classObj, Names.serializer, self)
@@ -99,3 +103,9 @@ class Serializer():
                 return classObj
         
         return jsonObject
+
+    def _setattrOnObj(self, classObj, k, v, typeHints):
+        if k in typeHints and issubclass(typeHints[k], Enum):
+            setattr(classObj, k, typeHints[k][v])
+        else:
+            setattr(classObj, k, v)

@@ -6,6 +6,7 @@ import json
 import sys
 
 from typing import List, Dict
+from enum import Enum, auto
 
 filename = "data/mainOutput.json"
 
@@ -76,8 +77,14 @@ class Bar(object):
     def postLoad(self):
         printLoadedClass(self)
 
+class EnumVal(Enum):
+    Val1 = auto()
+    Val2 = auto()
+    Val3 = auto()
+
 class Foo(object):
-    __slots__ = "x", "y", "z", "w", "s", "b", "v"
+    __slots__ = "x", "y", "z", "w", "s", "b", "v", "ev"
+    ev: EnumVal
     def __init__(self):
         self.x = 0
         self.y = -25.1
@@ -86,6 +93,7 @@ class Foo(object):
         self.s = "test"
         self.b = Bar()
         self.v = Vector(1, 4, 9)
+        self.ev = EnumVal.Val1
 
     def postLoad(self):
         printLoadedClass(self)

@@ -53,6 +53,9 @@ class CompoundEditor(QWidget):
 
             self._addEditorToLayout(name, editor)
 
+        if self.isHorizontalLayout:
+            self._widgetLayout.addStretch()
+
     def _dataChanged(self):
         if hasattr(self._targetObject, "onDataEdited"):
             self._targetObject.onDataEdited()

@@ -1,8 +1,11 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QHBoxLayout
 from PyQt5.QtCore import QSize, QObject, pyqtSignal
 
+from enum import Enum
+
 from .EditorBool import EditorBool
 from .EditorDict import EditorDict
+from .EditorEnum import EditorEnum
 from .EditorFloat import EditorFloat
 from .EditorInt import EditorInt
 from .EditorLink import EditorLink
@@ -62,6 +65,8 @@ class EditorGenerator(QObject):
             valueEditor = EditorList(self, value, name, typeHint)
         elif valType == dict:
             valueEditor = EditorDict(self, value, name, typeHint)
+        elif isinstance(value, Enum):
+            valueEditor = EditorEnum(self, value, name, typeHint)
         else:
             return QLabel(str(valType) + " is not implemented.\nIf it is a custom class, you need to use __slots__.")
 
