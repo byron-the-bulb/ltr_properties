@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QComboBox
 
 from .CompoundEditor import CompoundEditor
 from .TypeUtils import getAllSlots
+from enum import Enum
 
 import typing
 
@@ -28,6 +29,8 @@ class EditorSlottedClass(CompoundEditor):
                         value = []
                     else:
                         value = typeHint()
+                elif issubclass(typeHint, Enum):
+                    value = list(typeHint)[0]
                 else:
                     value = typeHint()
 
