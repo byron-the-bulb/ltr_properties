@@ -18,10 +18,11 @@ class EditorColor(QPushButton):
         self.clicked.connect(self._pickColor)
 
     def _pickColor(self):
-        r, g, b = self._value.getRgb()
-        dialog = QColorDialog(QColor(r, g, b), self)
+        dialog = QColorDialog(self)
         dialog.setOption(QColorDialog.DontUseNativeDialog)
         dialog.setStyleSheet("")
+        r, g, b = self._value.getRgb()
+        dialog.setCurrentColor(QColor(r, g, b))
         if dialog.exec() == QColorDialog.Accepted:
             with self._editorGenerator.threadLock():
                 newR, newG, newB, dummy = dialog.currentColor().getRgb()
