@@ -7,6 +7,8 @@ from .ObjectTree import ObjectTree
 from .EditorColor import EditorColor
 from .EditorSlottedClass import EditorSlottedClassHorizontal
 from .Link import Link
+from .UIUtils import clearLayout
+from .TypeUtils import getDictKVTypeHints, getLinkTypeHint, getListElemTypeHint
 
 __version__ = '0.1.0'
 __author__ = 'Bill Clark <bill@skythievesgame.com>'

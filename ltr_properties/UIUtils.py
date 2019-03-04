@@ -1,6 +1,6 @@
 def clearLayout(layout):
     for i in reversed(range(layout.count())): 
-        item = layout.itemAt(i)
+        item = layout.takeAt(i)
         widget = item.widget()
         if widget:
             widget.deleteLater()

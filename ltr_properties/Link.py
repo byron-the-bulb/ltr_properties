@@ -18,6 +18,9 @@ class Link(Generic[T]):
         self.filename = filename
         self._object = obj
 
+    def hasObject(self):
+        return self._object != None
+
     def __getattr__(self, name):
         if not name in Link.__slots__ and self._object:
             return getattr(self._object, name)

@@ -50,7 +50,8 @@ class EditorSlottedClass(CompoundEditor):
             return []
 
     def _getSelectableClasses(self, typeHint):
-        yield typeHint
+        if not getattr(typeHint, "__abstractmethods__", False):
+            yield typeHint
         for subclass in typeHint.__subclasses__():
             yield from self._getSelectableClasses(subclass)
 

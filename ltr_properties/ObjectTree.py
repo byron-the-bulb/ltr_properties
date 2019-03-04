@@ -11,7 +11,7 @@ class ObjectTree(QTreeView):
     fileActivated = pyqtSignal(str, str)
     pathDeleted = pyqtSignal(str)
 
-    def __init__(self, rootPath, classDict):
+    def __init__(self, rootPath, classDict, iconProvider):
         super().__init__()
 
         self._classDict = classDict
@@ -19,6 +19,8 @@ class ObjectTree(QTreeView):
         self._model = QFileSystemModel(self)
         self._model.setNameFilters(["*.json"])
         self._model.setNameFilterDisables(False)
+        if iconProvider:
+            self._model.setIconProvider(iconProvider)
         self.setModel(self._model)
         self.setSortingEnabled(True)
         self.sortByColumn(0, Qt.AscendingOrder)

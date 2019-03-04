@@ -15,7 +15,8 @@ from PyQt5.QtGui import QKeySequence
 class LtrEditor(QWidget):
     objectChanged = pyqtSignal(str)
 
-    def __init__(self, root, classModule, classModuleRootFolders=None, serializerIndent = None, threadLock=threading.Lock(), parent=None):
+    def __init__(self, root, classModule, classModuleRootFolders=None, serializerIndent = None,
+            threadLock=threading.Lock(), parent=None, iconProvider=None):
         super().__init__(parent)
 
         # Make sure icons are loaded before we use them.
@@ -24,7 +25,7 @@ class LtrEditor(QWidget):
         self._threadLock = threadLock
 
         if classModuleRootFolders == None:
-            classModuleRootFolders = [os.path.dirname(inspect.getfile(classModule))]
+            classModuleRootFolders = [os.path.abspath(os.path.dirname(inspect.getfile(classModule)))]
 
         classDict = TypeUtils.getClasses(classModule, classModuleRootFolders)
 
@@ -32,7 +33,7 @@ class LtrEditor(QWidget):
 
         mainLayout = QHBoxLayout(self)
 
-        self._objectTree = ObjectTree(root, classDict)
+        self._objectTree = ObjectTree(root, classDict, iconProvider)
         sizePolicy = self._objectTree.sizePolicy()
         sizePolicy.setHorizontalStretch(1)
         self._objectTree.setSizePolicy(sizePolicy)
