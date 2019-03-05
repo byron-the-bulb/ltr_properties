@@ -15,7 +15,7 @@ from .EditorString import EditorString
 from .EditorVirtualObject import EditorVirtualObject
 
 from .Link import Link
-from .VirtualObject import VirtualObject
+from .VirtualObject import VirtualObjectBase
 
 from .HoverableButton import HoverableButton
 
@@ -61,6 +61,8 @@ class EditorGenerator(QObject):
             valueEditor = EditorString(self, value, name, typeHint)
         elif valType == Link:
             valueEditor = EditorLink(self, value, name, typeHint)
+        elif isinstance(value, VirtualObjectBase):
+            valueEditor = EditorVirtualObject(self, value, name, typeHint)
         elif hasattr(value, "__slots__"):
             valueEditor = EditorSlottedClass(self, value, name, typeHint)
         elif valType == list:
@@ -69,8 +71,6 @@ class EditorGenerator(QObject):
             valueEditor = EditorDict(self, value, name, typeHint)
         elif isinstance(value, Enum):
             valueEditor = EditorEnum(self, value, name, typeHint)
-        elif isinstance(value, VirtualObject):
-            valueEditor = EditorVirtualObject(self, value, name, typeHint)
         else:
             return QLabel(str(valType) + " is not implemented.\nIf it is a custom class, you need to use __slots__.")
 

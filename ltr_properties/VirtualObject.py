@@ -1,9 +1,12 @@
 import abc
 import os
 
-from .TypeUtils import getEditablePropertiesSlottedObject
+from typing import List
 
-class VirtualObject(abc.ABC):
+from . import TypeUtils
+
+# This class can be inherited to create objects that let you edit properties across multiple other objects
+class VirtualObjectBase(abc.ABC):
     # Should yield relative paths of objects that should be loaded to get properties from.
     @abc.abstractmethod
     def getSourceObjects(self, rootPath):
@@ -14,18 +17,22 @@ class VirtualObject(abc.ABC):
     def getPropertiesFromObject(self, obj):
         pass
     
-class VirtualObjectFoldersAndPropertiesByName(VirtualObject):
-    def __init__(self, folders, properties):
-        self._folders = folders
-        self._properties = properties
+# This is a default implementation of the VirtualObject concept that will meet many use cases
+class VirtualObject(VirtualObjectBase):
+    __slots__ = "folders", "properties"
+    folders: List[str]
+    properties: List[str]
+    def __init__(self):
+        self._folders = []
+        self._properties = []
 
     def getSourceObjects(self, rootPath):
-        for folder in self._folders:
+        for folder in self.folders:
             for path in os.listdir(os.path.join(rootPath, folder)):
                 if path.endswith(".json"):
-                    yield path
+                    yield os.path.join(folder, path)
 
     def getPropertiesFromObject(self, obj):
-        for name, value, setter, typeHint in getEditablePropertiesSlottedObject(obj):
-            if name in self._properties:
+        for name, value, setter, typeHint in TypeUtils.getEditablePropertiesSlottedObject(obj):
+            if name in self.properties:
                 yield name, value, setter, typeHint

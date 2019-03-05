@@ -1,7 +1,5 @@
 from .CompoundEditor import CompoundEditor
 
-from .VirtualObject import VirtualObject
-
 class EditorVirtualObject(CompoundEditor):
     def _getProperties(self):
         serializer = self._editorGenerator.serializer()

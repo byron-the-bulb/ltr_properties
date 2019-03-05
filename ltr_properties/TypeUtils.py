@@ -1,6 +1,7 @@
 import typing
 import inspect
 from . import Link
+from . import VirtualObject
 from enum import Enum
 
 def getAllSlots(obj):
@@ -48,9 +49,11 @@ def getEditablePropertiesSlottedObject(obj):
         yield name, value, setter, typeHint
 
 def getClasses(module, moduleRootFolders):
-    classes = {"Link": Link.Link}
+    classes = {}
     checkedModules = [module]
     _getClassesRecurse(module, moduleRootFolders, classes, checkedModules)
+    classes["Link"] = Link.Link
+    classes["VirtualObject"] = VirtualObject.VirtualObject
     return classes
 
 def _getClassesRecurse(module, moduleRootFolders, classes, checkedModules):
