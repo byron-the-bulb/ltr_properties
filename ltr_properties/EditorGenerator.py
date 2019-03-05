@@ -12,8 +12,10 @@ from .EditorLink import EditorLink
 from .EditorList import EditorList
 from .EditorSlottedClass import EditorSlottedClass
 from .EditorString import EditorString
+from .EditorVirtualObject import EditorVirtualObject
 
 from .Link import Link
+from .VirtualObject import VirtualObject
 
 from .HoverableButton import HoverableButton
 
@@ -67,6 +69,8 @@ class EditorGenerator(QObject):
             valueEditor = EditorDict(self, value, name, typeHint)
         elif isinstance(value, Enum):
             valueEditor = EditorEnum(self, value, name, typeHint)
+        elif isinstance(value, VirtualObject):
+            valueEditor = EditorVirtualObject(self, value, name, typeHint)
         else:
             return QLabel(str(valType) + " is not implemented.\nIf it is a custom class, you need to use __slots__.")
 

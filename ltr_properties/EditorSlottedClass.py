@@ -1,40 +1,14 @@
 from PyQt5.QtWidgets import QComboBox
 
 from .CompoundEditor import CompoundEditor
-from .TypeUtils import getAllSlots
+from .TypeUtils import getAllSlots, getEditablePropertiesSlottedObject
 from enum import Enum
 
 import typing
 
 class EditorSlottedClass(CompoundEditor):
     def _getProperties(self):
-        typeHints = typing.get_type_hints(type(self._targetObject))
-
-        for name in getAllSlots(self._targetObject):
-            # Let users add hidden properties (including __dict__).
-            if name.startswith("_"):
-                continue
-
-            value = getattr(self._targetObject, name, None)
-
-            setter = lambda val, thisName=name: setattr(self._targetObject, thisName, val)
-
-            typeHint = typeHints[name] if name in typeHints else None
-
-            if typeHint and value == None:
-                if hasattr(typeHint, "__origin__"):
-                    if typeHint.__origin__ == typing.Dict:
-                        value = {}
-                    elif typeHint.__origin__ == typing.List:
-                        value = []
-                    else:
-                        value = typeHint()
-                elif issubclass(typeHint, Enum):
-                    value = list(typeHint)[0]
-                else:
-                    value = typeHint()
-
-            yield name, value, setter, typeHint
+        return getEditablePropertiesSlottedObject(self._targetObject)
 
     def _getHeaderWidgets(self):
         if self._typeHint and len(self._typeHint.__subclasses__()) > 0:

@@ -18,6 +18,35 @@ def getAllSlots(obj):
                     slots.append(slot)
     return slots
 
+def getEditablePropertiesSlottedObject(obj):
+    typeHints = typing.get_type_hints(type(obj))
+
+    for name in getAllSlots(obj):
+        # Let users add hidden properties (including __dict__).
+        if name.startswith("_"):
+            continue
+
+        value = getattr(obj, name, None)
+
+        setter = lambda val, thisName=name: setattr(obj, thisName, val)
+
+        typeHint = typeHints[name] if name in typeHints else None
+
+        if typeHint and value == None:
+            if hasattr(typeHint, "__origin__"):
+                if typeHint.__origin__ == typing.Dict:
+                    value = {}
+                elif typeHint.__origin__ == typing.List:
+                    value = []
+                else:
+                    value = typeHint()
+            elif issubclass(typeHint, Enum):
+                value = list(typeHint)[0]
+            else:
+                value = typeHint()
+
+        yield name, value, setter, typeHint
+
 def getClasses(module, moduleRootFolders):
     classes = {"Link": Link.Link}
     checkedModules = [module]

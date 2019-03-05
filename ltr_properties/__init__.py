@@ -9,6 +9,7 @@ from .EditorSlottedClass import EditorSlottedClassHorizontal
 from .Link import Link
 from .UIUtils import clearLayout
 from .TypeUtils import getDictKVTypeHints, getLinkTypeHint, getListElemTypeHint
+from .VirtualObject import VirtualObject, VirtualObjectFoldersAndPropertiesByName
 
 __version__ = '0.1.0'
 __author__ = 'Bill Clark <bill@skythievesgame.com>'
