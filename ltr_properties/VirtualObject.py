@@ -16,6 +16,10 @@ class VirtualObjectBase(abc.ABC):
     @abc.abstractmethod
     def getPropertiesFromObject(self, obj):
         pass
+
+    def postSave(self, serializer):
+        for sourceObjPath in self.getSourceObjects(serializer.root()):
+            serializer.saveIfLoaded(sourceObjPath)
     
 # This is a default implementation of the VirtualObject concept that will meet many use cases
 class VirtualObject(VirtualObjectBase):

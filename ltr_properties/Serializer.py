@@ -61,6 +61,12 @@ class Serializer():
     def save(self, filename, obj):
         with open(os.path.join(self._root, filename), 'w') as saveFile:
             saveFile.write(self.encode(obj))
+        if hasattr(obj, Names.postSaveMethod):
+            getattr(obj, Names.postSaveMethod)(self)
+
+    def saveIfLoaded(self, filename):
+        if filename in self._loadedObjects:
+            self.save(filename, self._loadedObjects[filename])
 
     class __Encoder(json.JSONEncoder):
         def default(self, o):
