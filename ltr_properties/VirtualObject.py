@@ -32,6 +32,8 @@ class VirtualObject(VirtualObjectBase):
 
     def getSourceObjects(self, rootPath):
         for folder in self.folders:
+            if len(folder) == 0:
+                continue
             for path in os.listdir(os.path.join(rootPath, folder)):
                 if path.endswith(".json"):
                     yield os.path.join(folder, path)
