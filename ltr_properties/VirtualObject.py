@@ -27,8 +27,8 @@ class VirtualObject(VirtualObjectBase):
     folders: List[str]
     properties: List[str]
     def __init__(self):
-        self._folders = []
-        self._properties = []
+        self.folders = []
+        self.properties = []
 
     def getSourceObjects(self, rootPath):
         for folder in self.folders:
