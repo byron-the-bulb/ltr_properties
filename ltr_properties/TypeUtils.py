@@ -48,13 +48,10 @@ def getClasses(module, moduleRootFolders):
     return classes
 
 def instantiateTypeHint(typeHint):
-    if hasattr(typeHint, "__origin__"):
-        if typeHint.__origin__ == typing.Dict:
-            return {}
-        elif typeHint.__origin__ == typing.List:
-            return []
-        else:
-            return typeHint()
+    if _typeHintIsDict(typeHint):
+        return {}
+    elif _typeHintIsList(typeHint):
+        return []
     elif issubclass(typeHint, Enum):
         return list(typeHint)[0]
     else:
@@ -107,29 +104,14 @@ def basicTypeMatches(value, typeHint):
 def checkType(value, typeHint, path):
     success = True
 
-    if sys.version_info[0] == 3 and sys.version_info[1] >= 8:
-        origin = typing.get_origin(typeHint)
-        if origin == list:
-            success = _checkTypeList(value, typeHint, path)
-        elif origin == dict:
-            success = _checkTypeDict(value, typeHint, path)
-        elif origin == Link.Link:
-            success = _checkTypeLink(value, typeHint, path)
-        elif not basicTypeMatches(value, typeHint):
-            success = False
-
-    else:
-        if hasattr(typeHint, "__origin__"):
-            if typeHint.__origin__ == typing.List:
-                success = _checkTypeList(value, typeHint, path)
-            elif typeHint.__origin__ == typing.Dict:
-                success = _checkTypeDict(value, typeHint, path)
-            elif typeHint.__origin__ == Link.Link:
-                success = _checkTypeLink(value, typeHint, path)
-            else:
-                raise NotImplementedError("Type checking not implemented for " + str(typeHint))
-        elif not basicTypeMatches(value, typeHint):
-            success = False
+    if _typeHintIsList(typeHint):
+        success = _checkTypeList(value, typeHint, path)
+    elif _typeHintIsDict(typeHint):
+        success = _checkTypeDict(value, typeHint, path)
+    elif _typeHintIsLink(typeHint):
+        success = _checkTypeLink(value, typeHint, path)
+    elif not basicTypeMatches(value, typeHint):
+        success = False
     
     if not success:
         raise TypeError(str(type(value)) + " is not type " + str(typeHint) +
@@ -154,6 +136,24 @@ def getLinkTypeHint(typeHint):
         return typeHint.__args__[0]
     else:
         return None
+
+def _typeHintIsList(typeHint):
+    if sys.version_info[0] == 3 and sys.version_info[1] >= 8:
+        return typing.get_origin(typeHint) == list
+    else:
+        return hasattr(typeHint, "__origin__") and typeHint.__origin__ == typing.List
+
+def _typeHintIsDict(typeHint):
+    if sys.version_info[0] == 3 and sys.version_info[1] >= 8:
+        return typing.get_origin(typeHint) == dict
+    else:
+        return hasattr(typeHint, "__origin__") and typeHint.__origin__ == typing.Dict
+
+def _typeHintIsLink(typeHint):
+    if sys.version_info[0] == 3 and sys.version_info[1] >= 8:
+        return typing.get_origin(typeHint) == Link.Link
+    else:
+        return hasattr(typeHint, "__origin__") and typeHint.__origin__ == Link.Link
 
 def _checkTypeList(value, typeHint, path):
     if type(value) != list:
