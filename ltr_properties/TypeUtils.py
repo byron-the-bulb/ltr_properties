@@ -1,5 +1,6 @@
 import typing
 import inspect
+import sys
 from . import Link
 from . import VirtualObject
 from enum import Enum
@@ -34,17 +35,7 @@ def getEditablePropertiesSlottedObject(obj):
         typeHint = typeHints[name] if name in typeHints else None
 
         if typeHint and value == None:
-            if hasattr(typeHint, "__origin__"):
-                if typeHint.__origin__ == typing.Dict:
-                    value = {}
-                elif typeHint.__origin__ == typing.List:
-                    value = []
-                else:
-                    value = typeHint()
-            elif issubclass(typeHint, Enum):
-                value = list(typeHint)[0]
-            else:
-                value = typeHint()
+            value = instantiateTypeHint(typeHint)
 
         yield name, value, setter, typeHint
 
@@ -56,6 +47,30 @@ def getClasses(module, moduleRootFolders):
     classes["VirtualObject"] = VirtualObject.VirtualObject
     return classes
 
+def instantiateTypeHint(typeHint):
+    if hasattr(typeHint, "__origin__"):
+        if typeHint.__origin__ == typing.Dict:
+            return {}
+        elif typeHint.__origin__ == typing.List:
+            return []
+        else:
+            return typeHint()
+    elif issubclass(typeHint, Enum):
+        return list(typeHint)[0]
+    else:
+        return typeHint()
+
+def dataEqual(dataA, dataB):
+    if type(dataA) != type(dataB):
+        return False
+    if hasattr(dataA, "__slots__"):
+        for slot in getAllSlots(dataA):
+            if not slot.startswith("_") and not dataEqual(getattr(dataA, slot, None), getattr(dataB, slot, None)):
+                return False
+    elif dataA != dataB:
+            return False
+    return True 
+
 def _getClassesRecurse(module, moduleRootFolders, classes, checkedModules):
     for k, v in module.__dict__.items():
         if k.startswith("_"):
@@ -65,7 +80,7 @@ def _getClassesRecurse(module, moduleRootFolders, classes, checkedModules):
                 if k in classes and classes[k] != v:
                     raise TypeError("Multiple classes share the name " + k + "\n" + str(v) + "\n" + str(classes[k]))
                 classes[k] = v
-        elif inspect.ismodule(v) and not k in checkedModules:
+        elif inspect.ismodule(v) and not v.__name__ in sys.builtin_module_names and not k in checkedModules:
             if _isModuleOrClassFromRootFolder(v, moduleRootFolders):
                 checkedModules.append(k)
                 _getClassesRecurse(v, moduleRootFolders, classes, checkedModules)

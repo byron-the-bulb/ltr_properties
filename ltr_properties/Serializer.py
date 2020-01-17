@@ -77,11 +77,19 @@ class Serializer():
 
                 className = type(o).__name__
 
+                typeHints = typing.get_type_hints(type(o))
+
                 contents = {}
                 for key in slots:
-                    if (not key.startswith("_") and hasattr(o, key) and
-                        (not hasattr(defaultObj, key) or getattr(o, key) != getattr(defaultObj, key))):
-                        contents[key] = getattr(o, key)
+                    if not key.startswith("_") and hasattr(o, key):
+                        defaultValue = None
+                        if hasattr(defaultObj, key):
+                            defaultValue = getattr(defaultObj, key)
+                        else:
+                            defaultValue = TypeUtils.instantiateTypeHint(typeHints[key]) if typeHints and key in typeHints else None
+
+                        if not TypeUtils.dataEqual(getattr(o, key), defaultValue):
+                            contents[key] = getattr(o, key)
                     elif (key == Names.saveAsClass):
                         className = getattr(o, key)
 
@@ -100,6 +108,10 @@ class Serializer():
                     if k in typeHints:
                         TypeUtils.checkType(v, typeHints[k], className + '.' + k)
                     self._setattrOnObj(classObj, k, v, typeHints)
+
+                for k, v in typeHints.items():
+                    if not hasattr(classObj, k):
+                        setattr(classObj, k, TypeUtils.instantiateTypeHint(v))
 
                 if Names.serializer in classType.__slots__:
                     setattr(classObj, Names.serializer, self)
