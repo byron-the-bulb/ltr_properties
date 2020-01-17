@@ -10,6 +10,7 @@ class EditorFloat(QDoubleSpinBox):
 
         self.setFixedWidth(editorGenerator.spinBoxWidth())
         self.setRange(-100000,100000)
+        self.setSingleStep(0.05)
         self.setValue(targetObject)
 
         self.valueChanged.connect(self._dataChanged)

@@ -1,6 +1,7 @@
 import inspect
 import json
 import os
+import sys
 import typing
 
 from enum import Enum
@@ -77,11 +78,19 @@ class Serializer():
 
                 className = type(o).__name__
 
+                typeHints = typing.get_type_hints(type(o))
+
                 contents = {}
                 for key in slots:
-                    if (not key.startswith("_") and hasattr(o, key) and
-                        (not hasattr(defaultObj, key) or getattr(o, key) != getattr(defaultObj, key))):
-                        contents[key] = getattr(o, key)
+                    if not key.startswith("_") and hasattr(o, key):
+                        defaultValue = None
+                        if hasattr(defaultObj, key):
+                            defaultValue = getattr(defaultObj, key)
+                        else:
+                            defaultValue = TypeUtils.instantiateTypeHint(typeHints[key]) if typeHints and key in typeHints else None
+
+                        if not TypeUtils.dataEqual(getattr(o, key), defaultValue):
+                            contents[key] = getattr(o, key)
                     elif (key == Names.saveAsClass):
                         className = getattr(o, key)
 
@@ -101,6 +110,10 @@ class Serializer():
                         TypeUtils.checkType(v, typeHints[k], className + '.' + k)
                     self._setattrOnObj(classObj, k, v, typeHints)
 
+                for k, v in typeHints.items():
+                    if not hasattr(classObj, k):
+                        setattr(classObj, k, TypeUtils.instantiateTypeHint(v))
+
                 if Names.serializer in classType.__slots__:
                     setattr(classObj, Names.serializer, self)
                 if hasattr(classObj, Names.postLoadMethod):
@@ -111,7 +124,17 @@ class Serializer():
         return jsonObject
 
     def _setattrOnObj(self, classObj, k, v, typeHints):
-        if k in typeHints and issubclass(typeHints[k], Enum):
-            setattr(classObj, k, typeHints[k][v])
-        else:
+        doDefaultSet = True
+        if k in typeHints:
+            if sys.version_info[0] == 3 and sys.version_info[1] >= 8:
+                #In version 3.8, things like Link[Color] throw on issubclass
+                if typing.get_origin(typeHints[k]) == None and issubclass(typeHints[k], Enum):
+                    setattr(classObj, k, typeHints[k][v])
+                    doDefaultSet = False
+            else: # version 3.7 and earlier
+                if issubclass(typeHints[k], Enum):
+                    setattr(classObj, k, typeHints[k][v])
+                    doDefaultSet = False
+
+        if doDefaultSet:
             setattr(classObj, k, v)

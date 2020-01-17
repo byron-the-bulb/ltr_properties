@@ -1,4 +1,5 @@
 from .AddObjectDialog import AddObjectDialog
+from .DuplicateObjectDialog import DuplicateObjectDialog
 
 from PyQt5.QtWidgets import QTreeView, QFileSystemModel, QMenu, QAction, QInputDialog, QMessageBox
 from PyQt5.QtCore import pyqtSignal, Qt
@@ -58,6 +59,7 @@ class ObjectTree(QTreeView):
         if clickedIndex.isValid():
             menu.addSeparator()
             if os.path.isfile(clickedPath):
+                menu.addAction("Duplicate Object", lambda: self._duplicateObject(clickedPath))
                 menu.addAction("Delete Object", lambda: self._deleteObject(clickedPath))
             else:
                 menu.addAction("Delete Folder", lambda: self._deleteFolder(clickedPath))
@@ -89,6 +91,21 @@ class ObjectTree(QTreeView):
             try:
                 with open(destPath, 'w') as outFile:
                     outFile.write(json.JSONEncoder().encode({dialog.objClass(): {}}))
+            except OSError as e:
+                QMessageBox.warning(self, "Failed to make object", str(e))
+
+    def _duplicateObject(self, oldPath):
+        shortPath = os.path.relpath(oldPath, self.rootPath())
+        shortPath = shortPath.replace(".json", "")
+        dialog = DuplicateObjectDialog(shortPath, self)
+        result = dialog.exec()
+        if result == DuplicateObjectDialog.Accepted:
+            destPath = os.path.join(self.rootPath(), dialog.path() + ".json")
+            if os.path.exists(destPath):
+                QMessageBox.warning(self, "Already exists", destPath + " already exists")
+                return
+            try:
+                shutil.copyfile(oldPath, destPath)
             except OSError as e:
                 QMessageBox.warning(self, "Failed to make object", str(e))
 

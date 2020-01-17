@@ -130,6 +130,9 @@ class LtrEditor(QWidget):
     def objectTree(self):
         return self._objectTree
 
+    def serializer(self):
+        return self._serializer
+
     def threadLock(self):
         return self._threadLock
 

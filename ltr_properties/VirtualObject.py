@@ -17,6 +17,7 @@ class VirtualObjectBase(abc.ABC):
     def getPropertiesFromObject(self, obj):
         pass
 
+    # Save all the referenced objects when saving this. #TODO: only save changed objects.
     def postSave(self, serializer):
         for sourceObjPath in self.getSourceObjects(serializer.root()):
             serializer.saveIfLoaded(sourceObjPath)
