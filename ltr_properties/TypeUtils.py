@@ -106,17 +106,30 @@ def basicTypeMatches(value, typeHint):
 
 def checkType(value, typeHint, path):
     success = True
-    if hasattr(typeHint, "__origin__"):
-        if typeHint.__origin__ == typing.List:
+
+    if sys.version_info[0] == 3 and sys.version_info[1] >= 8:
+        origin = typing.get_origin(typeHint)
+        if origin == list:
             success = _checkTypeList(value, typeHint, path)
-        elif typeHint.__origin__ == typing.Dict:
+        elif origin == dict:
             success = _checkTypeDict(value, typeHint, path)
-        elif typeHint.__origin__ == Link.Link:
+        elif origin == Link.Link:
             success = _checkTypeLink(value, typeHint, path)
-        else:
-            raise NotImplementedError("Type checking not implemented for " + str(typeHint))
-    elif not basicTypeMatches(value, typeHint):
-        success = False
+        elif not basicTypeMatches(value, typeHint):
+            success = False
+
+    else:
+        if hasattr(typeHint, "__origin__"):
+            if typeHint.__origin__ == typing.List:
+                success = _checkTypeList(value, typeHint, path)
+            elif typeHint.__origin__ == typing.Dict:
+                success = _checkTypeDict(value, typeHint, path)
+            elif typeHint.__origin__ == Link.Link:
+                success = _checkTypeLink(value, typeHint, path)
+            else:
+                raise NotImplementedError("Type checking not implemented for " + str(typeHint))
+        elif not basicTypeMatches(value, typeHint):
+            success = False
     
     if not success:
         raise TypeError(str(type(value)) + " is not type " + str(typeHint) +

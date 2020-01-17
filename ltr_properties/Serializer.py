@@ -1,6 +1,7 @@
 import inspect
 import json
 import os
+import sys
 import typing
 
 from enum import Enum
@@ -123,7 +124,17 @@ class Serializer():
         return jsonObject
 
     def _setattrOnObj(self, classObj, k, v, typeHints):
-        if k in typeHints and issubclass(typeHints[k], Enum):
-            setattr(classObj, k, typeHints[k][v])
-        else:
+        doDefaultSet = True
+        if k in typeHints:
+            if sys.version_info[0] == 3 and sys.version_info[1] >= 8:
+                #In version 3.8, things like Link[Color] throw on issubclass
+                if typing.get_origin(typeHints[k]) == None and issubclass(typeHints[k], Enum):
+                    setattr(classObj, k, typeHints[k][v])
+                    doDefaultSet = False
+            else: # version 3.7 and earlier
+                if issubclass(typeHints[k], Enum):
+                    setattr(classObj, k, typeHints[k][v])
+                    doDefaultSet = False
+
+        if doDefaultSet:
             setattr(classObj, k, v)
