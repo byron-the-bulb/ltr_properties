@@ -15,7 +15,7 @@ class Link(Generic[T]):
             self._object = getattr(self, Names.serializer).load(self.filename)
 
     def setObject(self, filename, obj):
-        self.filename = filename
+        self.filename = filename.replace("\\", "/")
         self._object = obj
 
     def hasObject(self):

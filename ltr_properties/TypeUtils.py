@@ -52,6 +52,8 @@ def instantiateTypeHint(typeHint):
         return {}
     elif _typeHintIsList(typeHint):
         return []
+    elif _typeHintIsLink(typeHint):
+        return typeHint()
     elif issubclass(typeHint, Enum):
         return list(typeHint)[0]
     else:

@@ -16,13 +16,14 @@ class LtrEditor(QWidget):
     objectChanged = pyqtSignal(str)
 
     def __init__(self, root, classModule, classModuleRootFolders=None, serializerIndent = None,
-            threadLock=threading.Lock(), parent=None, iconProvider=None):
+            threadLock=threading.Lock(), parent=None, iconProvider=None, labelWidth=100):
         super().__init__(parent)
 
         # Make sure icons are loaded before we use them.
         Icons.LoadIcons()
 
         self._threadLock = threadLock
+        self._labelWidth = labelWidth
 
         if classModuleRootFolders == None:
             classModuleRootFolders = [os.path.abspath(os.path.dirname(inspect.getfile(classModule)))]
@@ -89,7 +90,7 @@ class LtrEditor(QWidget):
 
         scrollArea.setWidgetResizable(True)
 
-        pe = PropertyEditorWidget(self._serializer)
+        pe = PropertyEditorWidget(self._serializer, labelWidth=self._labelWidth)
         pe.setThreadLock(self._threadLock)
         for objType, editType in self._customEditorMappings.items():
             pe.registerCustomEditor(objType, editType)
