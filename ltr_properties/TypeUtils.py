@@ -54,6 +54,8 @@ def instantiateTypeHint(typeHint):
         return []
     elif _typeHintIsLink(typeHint):
         return typeHint()
+    elif typeHintIsOptional(typeHint):
+        return None
     elif issubclass(typeHint, Enum):
         return list(typeHint)[0]
     else:
@@ -112,6 +114,8 @@ def checkType(value, typeHint, path):
         success = _checkTypeDict(value, typeHint, path)
     elif _typeHintIsLink(typeHint):
         success = _checkTypeLink(value, typeHint, path)
+    elif typeHintIsOptional(typeHint):
+        success = _checkTypeOptional(value, typeHint, path)
     elif not basicTypeMatches(value, typeHint):
         success = False
     
@@ -139,6 +143,12 @@ def getLinkTypeHint(typeHint):
     else:
         return None
 
+def getOptionalTypeHint(typeHint):
+    if typeHint:
+        return typeHint.__args__[0]
+    else:
+        return None
+
 def _typeHintIsList(typeHint):
     if sys.version_info[0] == 3 and sys.version_info[1] >= 8:
         return typing.get_origin(typeHint) == list
@@ -156,6 +166,12 @@ def _typeHintIsLink(typeHint):
         return typing.get_origin(typeHint) == Link.Link
     else:
         return hasattr(typeHint, "__origin__") and typeHint.__origin__ == Link.Link
+
+def typeHintIsOptional(typeHint):
+    if sys.version_info[0] == 3 and sys.version_info[1] >= 8:
+        return typing.get_origin(typeHint) == typing.Union
+    else:
+        return hasattr(typeHint, "__origin__") and typeHint.__origin__ == typing.Union
 
 def _checkTypeList(value, typeHint, path):
     if type(value) != list:
@@ -187,4 +203,14 @@ def _checkTypeLink(value, typeHint, path):
         linkedObject = value._object
         if linkedObject != None and not isinstance(linkedObject, linkType):
             return False
+    return True
+
+def _checkTypeOptional(value, typeHint, path):
+    if value == None:
+        return True
+
+    optionalType = getOptionalTypeHint(typeHint)
+    if  not checkType(value, optionalType, path):
+        return False
+
     return True

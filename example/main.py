@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QApplication
 import json
 import sys
 
-from typing import List, Dict
+from typing import List, Dict, Optional
 from enum import Enum, auto
 
 filename = "data/mainOutput.json"
@@ -56,7 +56,7 @@ class FancyBaz(Baz):
     fanciness: ltr_properties.Link[Color]
 
 class Bar(object):
-    __slots__ = "a", "b", "c", "d", "e", "_hidden"
+    __slots__ = "a", "b", "c", "d", "e", "f", "_hidden"
 
     # Type hints are optional, but are checked when deserializing. For lists and
     # dicts, they allow empty lists/dicts to be filled with new elements, rather
@@ -66,6 +66,7 @@ class Bar(object):
     c: List[Color]
     d: List[Vector]
     e: Baz
+    f: Optional[Vector]
     def __init__(self):
         self.a = {"one": "a", "two": "b"}
         self.b = "two"
@@ -94,6 +95,14 @@ class Foo(object):
         self.b = Bar()
         self.v = Vector(1, 4, 9)
         self.ev = EnumVal.Val1
+
+    def postLoad(self):
+        printLoadedClass(self)
+
+class OptionalTest(object):
+    __slots__ = "f", "of"
+    f: float
+    of: Optional[float]
 
     def postLoad(self):
         printLoadedClass(self)

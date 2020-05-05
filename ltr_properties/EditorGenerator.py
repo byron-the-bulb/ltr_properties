@@ -10,6 +10,7 @@ from .EditorFloat import EditorFloat
 from .EditorInt import EditorInt
 from .EditorLink import EditorLink
 from .EditorList import EditorList
+from .EditorOptional import EditorOptional
 from .EditorSlottedClass import EditorSlottedClass
 from .EditorString import EditorString
 from .EditorVirtualObject import EditorVirtualObject
@@ -19,7 +20,7 @@ from .VirtualObject import VirtualObjectBase
 
 from .HoverableButton import HoverableButton
 
-from .TypeUtils import checkType
+from .TypeUtils import checkType, typeHintIsOptional
 
 class EditorGenerator(QObject):
     gotoObject = pyqtSignal(str)
@@ -49,7 +50,9 @@ class EditorGenerator(QObject):
         # This set of elifs will either return a widget, or set this to a widget
         # that should then be connected to a setattr lambda to store the value.
         valueEditor = None
-        if valType in self._customEditors:
+        if typeHintIsOptional(typeHint):
+            valueEditor = EditorOptional(self, value, name, changeCallback, typeHint)
+        elif valType in self._customEditors:
             return self._customEditors[valType](self, value, name, typeHint)
         elif valType == bool:
             valueEditor = EditorBool(self, value, name, typeHint)
