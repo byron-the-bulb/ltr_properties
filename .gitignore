@@ -117,3 +117,5 @@ dmypy.json
 \.vscode/.ropeproject
 
 mainOutput\.json
+
+.vscode/settings.json

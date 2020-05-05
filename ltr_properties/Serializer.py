@@ -15,7 +15,7 @@ class Serializer():
 
         # Allow people to pass in a module and recover from that.
         if inspect.ismodule(classDict):
-            classModuleRootFolders = [os.path.dirname(inspect.getfile(classDict))]
+            classModuleRootFolders = [os.path.dirname(inspect.getfile(classDict)).replace('\\', '/')]
             classDict = TypeUtils.getClasses(classDict, classModuleRootFolders)
 
         self._classDict = classDict

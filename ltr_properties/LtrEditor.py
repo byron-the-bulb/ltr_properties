@@ -26,7 +26,7 @@ class LtrEditor(QWidget):
         self._labelWidth = labelWidth
 
         if classModuleRootFolders == None:
-            classModuleRootFolders = [os.path.abspath(os.path.dirname(inspect.getfile(classModule)))]
+            classModuleRootFolders = [os.path.abspath(os.path.dirname(inspect.getfile(classModule))).replace('\\', '/')]
 
         classDict = TypeUtils.getClasses(classModule, classModuleRootFolders)
 

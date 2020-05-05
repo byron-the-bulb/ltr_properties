@@ -86,7 +86,7 @@ def _getClassesRecurse(module, moduleRootFolders, classes, checkedModules):
 
 def _isModuleOrClassFromRootFolder(obj, moduleRootFolders):
     try:
-        objFile = inspect.getfile(obj)
+        objFile = inspect.getfile(obj).replace('\\', '/')
         for rootFolder in moduleRootFolders:
             if rootFolder in objFile:
                 return True
