@@ -7,14 +7,18 @@ class EditorDict(CompoundEditor):
     canDeleteElements = True
 
     def _getProperties(self):
+        keyHint, valueHint = getDictKVTypeHints(self._typeHint)
+
+        isUserEditableDict = self._typeHint and keyHint == str
+        
         for name, value in self._targetObject.items():
             keySetter = lambda val, thisName=name: self._setDictKey(thisName, val)
             valueSetter = lambda val, thisName=name: self._setDictValue(thisName, val)
-
-            keyHint, valueHint = getDictKVTypeHints(self._typeHint)
-
-            yield name + " Key", name, keySetter, keyHint
-            yield name + " Value", value, valueSetter, valueHint
+            if isUserEditableDict:
+                yield name + " Key", name, keySetter, keyHint
+                yield name + " Value", value, valueSetter, valueHint
+            else:
+                yield name, value, valueSetter, valueHint
 
     def _setDictKey(self, name, val):
         self._targetObject[val] = self._targetObject[name]
