@@ -9,8 +9,10 @@ from enum import Enum
 from . import TypeUtils
 from .Names import Names
 
+from PyQt5.QtWidgets import QMessageBox
+
 class Serializer():
-    def __init__(self, root, classDict, indent=None):
+    def __init__(self, root, classDict, indent=None, widgetParent=None):
         self._root = root
 
         # Allow people to pass in a module and recover from that.
@@ -24,6 +26,8 @@ class Serializer():
 
         self._loadStack = []
         self._loadedObjects = {}
+
+        self._widgetParent = widgetParent
 
     def decode(self, jsonStr):
         return self._decoder.decode(jsonStr)
@@ -47,9 +51,13 @@ class Serializer():
         if filename in self._loadedObjects:
             result = self._loadedObjects[filename]
         else:
-            with open(os.path.join(self._root, filename), 'r') as loadFile:
-                result = self.decode(loadFile.read())
-                self._loadedObjects[filename] = result
+            path = os.path.join(self._root, filename)
+            if os.path.exists(path):
+                with open(path, 'r') as loadFile:
+                    result = self.decode(loadFile.read())
+                    self._loadedObjects[filename] = result
+            elif self._widgetParent:
+                QMessageBox.warning(self._widgetParent, "Link to missing object", "Cannot find object at path:\n" + path)
                 
         return result, self._loadStack.pop()
 
