@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QSpinBox
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import Qt, QEvent, pyqtSignal
 
 class EditorInt(QSpinBox):
     dataChanged = pyqtSignal(int)
