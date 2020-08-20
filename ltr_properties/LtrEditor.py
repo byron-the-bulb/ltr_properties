@@ -30,7 +30,7 @@ class LtrEditor(QWidget):
 
         classDict = TypeUtils.getClasses(classModule, classModuleRootFolders)
 
-        self._serializer = Serializer(root, classDict, indent=serializerIndent)
+        self._serializer = Serializer(root, classDict, indent=serializerIndent, widgetParent=self)
 
         mainLayout = QHBoxLayout(self)
 
