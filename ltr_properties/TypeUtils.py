@@ -1,5 +1,6 @@
 import typing
 import inspect
+import os
 import sys
 from . import Link
 from . import VirtualObject
@@ -88,7 +89,7 @@ def _getClassesRecurse(module, moduleRootFolders, classes, checkedModules):
 
 def _isModuleOrClassFromRootFolder(obj, moduleRootFolders):
     try:
-        objFile = inspect.getfile(obj).replace('\\', '/')
+        objFile = os.path.abspath(inspect.getfile(obj)).replace('\\', '/')
         for rootFolder in moduleRootFolders:
             if rootFolder in objFile:
                 return True
