@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QDoubleSpinBox
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import Qt, QEvent, pyqtSignal
 
 class EditorFloat(QDoubleSpinBox):
     dataChanged = pyqtSignal(float)
@@ -12,9 +12,17 @@ class EditorFloat(QDoubleSpinBox):
         self.setRange(-100000,100000)
         self.setSingleStep(0.05)
         self.setValue(targetObject)
+        
+        self.setFocusPolicy(Qt.StrongFocus)
+        self.installEventFilter(self)
 
         self.valueChanged.connect(self._dataChanged)
 
     def _dataChanged(self, newVal):
         with self._editorGenerator.threadLock():
             self.dataChanged.emit(newVal)
+            
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.Wheel:
+            return True
+        return False
