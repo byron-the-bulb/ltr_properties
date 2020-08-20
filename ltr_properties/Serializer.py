@@ -145,4 +145,8 @@ class Serializer():
                     doDefaultSet = False
 
         if doDefaultSet:
-            setattr(classObj, k, v)
+            try:
+                setattr(classObj, k, v)
+            except:
+                if self._widgetParent:
+                    QMessageBox.warning(self._widgetParent, "Failed to set property from json data", "Could not find type for: " + k)
