@@ -1,5 +1,6 @@
 from .AddObjectDialog import AddObjectDialog
 from .DuplicateObjectDialog import DuplicateObjectDialog
+from .RenameDialog import RenameDialog
 
 from PyQt5.QtWidgets import QTreeView, QFileSystemModel, QMenu, QAction, QInputDialog, QMessageBox
 from PyQt5.QtCore import pyqtSignal, Qt
@@ -61,8 +62,10 @@ class ObjectTree(QTreeView):
             if os.path.isfile(clickedPath):
                 menu.addAction("Duplicate Object", lambda: self._duplicateObject(clickedPath))
                 menu.addAction("Delete Object", lambda: self._deleteObject(clickedPath))
+                menu.addAction("Rename Object", lambda: self._renameObject(clickedPath))
             else:
                 menu.addAction("Delete Folder", lambda: self._deleteFolder(clickedPath))
+                menu.addAction("Rename Folder", lambda: self._renameFolder(clickedPath))
 
         action = menu.exec_(self.mapToGlobal(event.pos()))
 
@@ -124,6 +127,35 @@ class ObjectTree(QTreeView):
         if reply == QMessageBox.Yes:
             os.unlink(path)
             self.pathDeleted.emit(path)
+
+    def _renameFolder(self, oldPath):
+        shortPath = os.path.relpath(oldPath, self.rootPath())
+        dialog = RenameDialog(shortPath, self)
+        result = dialog.exec()
+        if result == RenameDialog.Accepted:
+            destPath = os.path.join(self.rootPath(), dialog.path())
+            if os.path.exists(destPath):
+                QMessageBox.warning(self, "Already exists", destPath + " already exists")
+                return
+            try:
+                shutil.move(oldPath, destPath)
+            except OSError as e:
+                QMessageBox.warning(self, "Failed to rename folder", str(e))
+
+    def _renameObject(self, oldPath):
+        shortPath = os.path.relpath(oldPath, self.rootPath())
+        shortPath = shortPath.replace(".json", "")
+        dialog = RenameDialog(shortPath, self)
+        result = dialog.exec()
+        if result == RenameDialog.Accepted:
+            destPath = os.path.join(self.rootPath(), dialog.path() + ".json")
+            if os.path.exists(destPath):
+                QMessageBox.warning(self, "Already exists", destPath + " already exists")
+                return
+            try:
+                shutil.move(oldPath, destPath)
+            except OSError as e:
+                QMessageBox.warning(self, "Failed to rename object", str(e))
 
     def _onActivated(self, index):
         if self._model.isDir(index):
