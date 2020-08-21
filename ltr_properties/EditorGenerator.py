@@ -53,7 +53,7 @@ class EditorGenerator(QObject):
         if typeHintIsOptional(typeHint):
             valueEditor = EditorOptional(self, value, name, changeCallback, typeHint)
         elif valType in self._customEditors:
-            return self._customEditors[valType](self, value, name, typeHint)
+            valueEditor = self._customEditors[valType](self, value, name, typeHint)
         elif valType == bool:
             valueEditor = EditorBool(self, value, name, typeHint)
         elif valType == int:

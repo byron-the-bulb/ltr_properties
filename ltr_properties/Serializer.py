@@ -139,9 +139,15 @@ class Serializer():
                 if typing.get_origin(typeHints[k]) == None and issubclass(typeHints[k], Enum):
                     setattr(classObj, k, typeHints[k][v])
                     doDefaultSet = False
+                elif hasattr(typeHints[k], "instantiate"):
+                    setattr(classObj, k, typeHints[k].instantiate(v))
+                    doDefaultSet = False
             else: # version 3.7 and earlier
                 if issubclass(typeHints[k], Enum):
                     setattr(classObj, k, typeHints[k][v])
+                    doDefaultSet = False
+                elif hasattr(typeHints[k], "instantiate"):
+                    setattr(classObj, k, typeHints[k].instantiate(v))
                     doDefaultSet = False
 
         if doDefaultSet:

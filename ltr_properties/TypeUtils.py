@@ -109,7 +109,9 @@ def basicTypeMatches(value, typeHint):
 def checkType(value, typeHint, path):
     success = True
 
-    if _typeHintIsList(typeHint):
+    if hasattr(typeHint, "checkType"):
+        success = typeHint.checkType(value)
+    elif _typeHintIsList(typeHint):
         success = _checkTypeList(value, typeHint, path)
     elif _typeHintIsDict(typeHint):
         success = _checkTypeDict(value, typeHint, path)
