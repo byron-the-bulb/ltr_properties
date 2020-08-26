@@ -7,6 +7,7 @@ import copy
 
 class EditorList(CompoundEditor):
     canDeleteElements = True
+    canMoveElements = True
 
     def _getProperties(self):
         for i in range(len(self._targetObject)):
@@ -39,6 +40,19 @@ class EditorList(CompoundEditor):
         with self._editorGenerator.threadLock():
             i = int(name)
             del self._targetObject[i]
+            self._createWidgetsForObject()
+            self.dataChanged.emit(self._targetObject)
+
+    def _moveClicked(self, name, delta):
+        with self._editorGenerator.threadLock():
+            i = int(name)
+
+            if i + delta < 0 or i + delta >= len(self._targetObject):
+                return
+
+            swap = self._targetObject[i + delta]
+            self._targetObject[i + delta] = self._targetObject[i]
+            self._targetObject[i] = swap
             self._createWidgetsForObject()
             self.dataChanged.emit(self._targetObject)
 

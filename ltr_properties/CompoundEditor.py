@@ -12,6 +12,7 @@ class CompoundEditor(QWidget):
     shouldSkipLabel = True
     isHorizontalLayout = False
     canDeleteElements = False
+    canMoveElements = False
 
     def __init__(self, editorGenerator, targetObject, name, typeHint):
         super().__init__()
@@ -80,20 +81,40 @@ class CompoundEditor(QWidget):
             return layout
 
     def _addEditorToLayout(self, name, editor):
-        deleteButton = None
+        preLabelWidget = None
+        if self.canDeleteElements or self.canMoveElements:
+            preLabelWidget = QWidget()
+            preLabelLayout = QHBoxLayout(preLabelWidget)
+            preLabelLayout.setContentsMargins(0, 0, 0, 0)
+            preLabelLayout.setSpacing(0)
+
         if self.canDeleteElements:
             deleteButton = self._editorGenerator.createButton(Icons.Delete)
             deleteButton.clicked.connect(lambda: self._deleteClicked(name))
+            preLabelWidget.layout().addWidget(deleteButton)
+
+        if self.canMoveElements:
+            moveWidget = QWidget()
+            moveLayout = QVBoxLayout(moveWidget)
+            moveLayout.setContentsMargins(0, 0, 0, 0)
+            moveLayout.setSpacing(0)
+            preLabelWidget.layout().addWidget(moveWidget)
+            moveButtonUp = self._editorGenerator.createButton(Icons.ArrowUp)
+            moveButtonDown = self._editorGenerator.createButton(Icons.ArrowDown)
+            moveButtonUp.clicked.connect(lambda: self._moveClicked(name, -1))
+            moveButtonDown.clicked.connect(lambda: self._moveClicked(name, 1))
+            moveLayout.addWidget(moveButtonUp)
+            moveLayout.addWidget(moveButtonDown)
             
         if hasattr(editor, "shouldSkipLabel") and editor.shouldSkipLabel:
-            if deleteButton:
-                self._widgetLayout.addWidget(self._editorGenerator.wrapWidget("", editor, deleteButton))
+            if preLabelWidget:
+                self._widgetLayout.addWidget(self._editorGenerator.wrapWidget("", editor, preLabelWidget))
             else:
                 self._widgetLayout.addWidget(editor)
         elif self.isHorizontalLayout:
-            if deleteButton:
-                self._widgetLayout.addWidget(deleteButton)
+            if preLabelWidget:
+                self._widgetLayout.addWidget(preLabelWidget)
             self._widgetLayout.addWidget(QLabel(name))
             self._widgetLayout.addWidget(editor)
         else:
-            self._widgetLayout.addWidget(self._editorGenerator.wrapWidget(name, editor, deleteButton))
+            self._widgetLayout.addWidget(self._editorGenerator.wrapWidget(name, editor, preLabelWidget))

@@ -8,6 +8,7 @@ def _LoadIcon(pngName):
 class Icons():
     Add = None
     ArrowDown = None
+    ArrowUp = None
     ArrowRight = None
     Delete = None
     Goto = None
@@ -22,6 +23,7 @@ class Icons():
         
         Icons.Add = _LoadIcon("add")
         Icons.ArrowDown = _LoadIcon("arrowDown")
+        Icons.ArrowUp = _LoadIcon("arrowUp")
         Icons.ArrowRight = _LoadIcon("arrowRight")
         Icons.Delete = _LoadIcon("delete")
         Icons.Goto = _LoadIcon("goto")
