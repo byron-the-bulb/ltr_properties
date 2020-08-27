@@ -112,7 +112,7 @@ class LtrEditor(QWidget):
                     self._pathToDataChangedCallbacks[loadedPath] = []
                 self._pathToDataChangedCallbacks[loadedPath].append(dataChangeCallback)
 
-        tabInfo = {"path": os.path.relpath(path), "dirty": False}
+        tabInfo = {"path": path, "dirty": False}
         self._tabInfo.append(tabInfo)
 
         self._tabWidget.addTab(scrollArea, name)
@@ -139,7 +139,6 @@ class LtrEditor(QWidget):
         return self._threadLock
 
     def _markTabDirty(self, path):
-        path = os.path.relpath(path, self._rootPath)
         for tabIndex, info in enumerate(self._tabInfo):
             if info["path"] == path and not info["dirty"]:
                 info["dirty"] = True
