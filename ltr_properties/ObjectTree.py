@@ -94,6 +94,9 @@ class ObjectTree(QTreeView):
             try:
                 with open(destPath, 'w') as outFile:
                     outFile.write(json.JSONEncoder().encode({dialog.objClass(): {}}))
+                
+                name = os.path.basename(destPath).replace(".json", "")
+                self.fileActivated.emit(name, destPath)                
             except OSError as e:
                 QMessageBox.warning(self, "Failed to make object", str(e))
 
@@ -109,6 +112,9 @@ class ObjectTree(QTreeView):
                 return
             try:
                 shutil.copyfile(oldPath, destPath)
+
+                name = os.path.basename(destPath).replace(".json", "")
+                self.fileActivated.emit(name, destPath)
             except OSError as e:
                 QMessageBox.warning(self, "Failed to make object", str(e))
 
@@ -154,6 +160,10 @@ class ObjectTree(QTreeView):
                 return
             try:
                 shutil.move(oldPath, destPath)
+                self.pathDeleted.emit(oldPath)
+
+                name = os.path.basename(destPath).replace(".json", "")
+                self.fileActivated.emit(name, destPath)
             except OSError as e:
                 QMessageBox.warning(self, "Failed to rename object", str(e))
 

@@ -24,6 +24,7 @@ class LtrEditor(QWidget):
 
         self._threadLock = threadLock
         self._labelWidth = labelWidth
+        self._rootPath = root
 
         if classModuleRootFolders == None:
             classModuleRootFolders = [os.path.abspath(os.path.dirname(inspect.getfile(classModule))).replace('\\', '/')]
@@ -111,7 +112,7 @@ class LtrEditor(QWidget):
                     self._pathToDataChangedCallbacks[loadedPath] = []
                 self._pathToDataChangedCallbacks[loadedPath].append(dataChangeCallback)
 
-        tabInfo = {"path": path, "dirty": False}
+        tabInfo = {"path": os.path.relpath(path), "dirty": False}
         self._tabInfo.append(tabInfo)
 
         self._tabWidget.addTab(scrollArea, name)
@@ -138,6 +139,7 @@ class LtrEditor(QWidget):
         return self._threadLock
 
     def _markTabDirty(self, path):
+        path = os.path.relpath(path, self._rootPath)
         for tabIndex, info in enumerate(self._tabInfo):
             if info["path"] == path and not info["dirty"]:
                 info["dirty"] = True
@@ -162,6 +164,7 @@ class LtrEditor(QWidget):
             self._onTabCloseRequested(self._tabWidget.currentIndex())
 
     def _onPathDeleted(self, path):
+        path = os.path.relpath(path, self._rootPath)
         for i in range(len(self._tabInfo) - 1, -1, -1):
             if path in self._tabInfo[i]["path"]:
                 del self._tabInfo[i]
