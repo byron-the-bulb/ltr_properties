@@ -114,7 +114,7 @@ class ObjectTree(QTreeView):
                 shutil.copyfile(oldPath, destPath)
 
                 name = os.path.basename(destPath).replace(".json", "")
-                self.fileActivated.emit(name, destPath)
+                self.fileActivated.emit(name, os.path.relpath(destPath, self.rootPath()))
             except OSError as e:
                 QMessageBox.warning(self, "Failed to make object", str(e))
 
