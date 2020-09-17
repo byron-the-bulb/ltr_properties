@@ -27,6 +27,10 @@ class EditorLink(QWidget):
         self._openButton.clicked.connect(self._onChooseFileClicked)
         layout.addWidget(self._openButton)
 
+        self._deleteButton = self._editorGenerator.createButton(Icons.Delete)
+        self._deleteButton.clicked.connect(self._delete)
+        layout.addWidget(self._deleteButton)
+
         self._gotoButton = self._editorGenerator.createButton(Icons.Goto)
         self._gotoButton.clicked.connect(self._goto)
         layout.addWidget(self._gotoButton)
@@ -62,3 +66,9 @@ class EditorLink(QWidget):
     def _goto(self):
         target = self._label.text()
         self._editorGenerator.gotoObject.emit(target)
+
+    def _delete(self):
+        with self._editorGenerator.threadLock():
+            self._targetObject.setObject("", None)
+            self.dataChanged.emit(self._targetObject)
+            self._label.setText("")
