@@ -12,5 +12,13 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
         },
+        {
+            "name": "Eternity TD Editor",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}../../eternity_td_cpp/TowerDefenseEditor/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}../../eternity_td_cpp"
+        },
     ]
 }
