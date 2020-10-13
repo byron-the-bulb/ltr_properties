@@ -12,6 +12,7 @@ class AddObjectDialog(QDialog):
 
         classList = list(classDict.keys())
         classList.remove("Link")
+        classList.sort()
 
         self._comboBoxClass = QComboBox()
         self._comboBoxClass.addItems(classList)
