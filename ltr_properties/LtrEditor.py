@@ -8,7 +8,7 @@ import inspect
 import threading
 import os
 
-from PyQt5.QtCore import QSize, pyqtSignal
+from PyQt5.QtCore import QSize, pyqtSignal, QDirIterator, QDir
 from PyQt5.QtWidgets import QWidget, QTabWidget, QHBoxLayout, QVBoxLayout, QScrollArea, QShortcut, QPushButton, QMessageBox
 from PyQt5.QtGui import QKeySequence
 
@@ -41,6 +41,7 @@ class LtrEditor(QWidget):
         self._objectTree.setSizePolicy(sizePolicy)
         self._objectTree.fileActivated.connect(self.openFile)
         self._objectTree.pathDeleted.connect(self._onPathDeleted)
+        self._objectTree.resaveAll.connect(self._onResaveAll)
         mainLayout.addWidget(self._objectTree)
 
         rightPanel = QWidget()
@@ -168,6 +169,22 @@ class LtrEditor(QWidget):
             if path in self._tabInfo[i]["path"]:
                 del self._tabInfo[i]
                 self._tabWidget.removeTab(i)
+
+    def _onResaveAll(self):
+        it = QDirIterator(self._rootPath, QDir.Files | QDir.NoDotAndDotDot, flags=QDirIterator.Subdirectories)
+        while it.hasNext():
+            fullPath = it.next()
+            path = os.path.relpath(fullPath, self._rootPath)
+            
+            alreadyOpen = False
+            for tabIndex in range(self._tabWidget.count()):
+                if self._tabInfo[tabIndex]["path"] == path:
+                    alreadyOpen = True
+                    break
+            
+            if not alreadyOpen:
+                obj = self._serializer.load(path)
+                self._serializer.save(path, obj)
 
     def _onRevertClicked(self):
         if self._tabWidget.currentIndex() >= 0:

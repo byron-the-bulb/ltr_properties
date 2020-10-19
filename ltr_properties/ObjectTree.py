@@ -12,6 +12,7 @@ import shutil
 class ObjectTree(QTreeView):
     fileActivated = pyqtSignal(str, str)
     pathDeleted = pyqtSignal(str)
+    resaveAll = pyqtSignal()
 
     def __init__(self, rootPath, classDict, iconProvider):
         super().__init__()
@@ -66,6 +67,9 @@ class ObjectTree(QTreeView):
             else:
                 menu.addAction("Delete Folder", lambda: self._deleteFolder(clickedPath))
                 menu.addAction("Rename Folder", lambda: self._renameFolder(clickedPath))
+
+        menu.addSeparator()
+        menu.addAction("Resave All", lambda: self._onResaveAll())
 
         action = menu.exec_(self.mapToGlobal(event.pos()))
 
@@ -174,3 +178,6 @@ class ObjectTree(QTreeView):
         name = self._model.fileName(index)
         name = name.replace(".json", "")
         self.fileActivated.emit(name, path)
+
+    def _onResaveAll(self):
+        self.resaveAll.emit()
