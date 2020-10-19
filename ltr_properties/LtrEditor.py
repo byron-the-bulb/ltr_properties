@@ -112,7 +112,7 @@ class LtrEditor(QWidget):
                     self._pathToDataChangedCallbacks[loadedPath] = []
                 self._pathToDataChangedCallbacks[loadedPath].append(dataChangeCallback)
 
-        tabInfo = {"path": path, "dirty": False}
+        tabInfo = {"path": path, "dirty": False, "obj": obj}
         self._tabInfo.append(tabInfo)
 
         self._tabWidget.addTab(scrollArea, name)
@@ -197,15 +197,17 @@ class LtrEditor(QWidget):
             del self._tabInfo[index]
 
     def openFile(self, name, path, dataChangeCallback=None):
-        obj, loadedFiles = self._serializer.loadWithFileList(path)
+        obj = None
 
         foundIndex = -1
         for tabIndex in range(self._tabWidget.count()):
             if self._tabInfo[tabIndex]["path"] == path:
                 foundIndex = tabIndex
+                obj = self._tabInfo[tabIndex]["obj"]
                 break
-
+            
         if foundIndex == -1:
+            obj, loadedFiles = self._serializer.loadWithFileList(path)
             foundIndex = self._tabWidget.count()
             self.addTargetObject(obj, name, path, dataChangeCallback, loadedFiles)
 
