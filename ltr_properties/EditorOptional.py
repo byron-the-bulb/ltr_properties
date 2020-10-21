@@ -19,10 +19,6 @@ class EditorOptional(CompoundEditor):
             else:
                 yield self._name, self._targetObject, self._setter, getOptionalTypeHint(self._typeHint)
 
-    def _dataChanged(self, newValue):
-        self._targetObject = newValue
-        super()._dataChanged()
-
     def _getHeaderWidgets(self):
         classSelector = QComboBox()
         classSelector.addItem("None")
