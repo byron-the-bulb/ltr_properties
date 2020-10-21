@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QComboBox
 
 from .CompoundEditor import CompoundEditor
-from .TypeUtils import getOptionalTypeHint, getAllSlots
+from .TypeUtils import getOptionalTypeHint, getAllSlots, getEditablePropertiesSlottedObject
 from enum import Enum
 
 import typing
@@ -14,7 +14,10 @@ class EditorOptional(CompoundEditor):
 
     def _getProperties(self):
         if self._targetObject != None:
-            yield self._name, self._targetObject, self._setter, getOptionalTypeHint(self._typeHint)
+            if hasattr(self._targetObject, "__slots__"):
+                yield from getEditablePropertiesSlottedObject(self._targetObject)
+            else:
+                yield self._name, self._targetObject, self._setter, getOptionalTypeHint(self._typeHint)
 
     def _dataChanged(self, newValue):
         self._targetObject = newValue
