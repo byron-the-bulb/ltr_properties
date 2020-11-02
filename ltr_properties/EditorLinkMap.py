@@ -9,7 +9,7 @@ from PyQt5.QtCore import pyqtSignal
 import os
 
 class EditorLinkMap(QWidget):
-    dataChanged = pyqtSignal(Link)
+    dataChanged = pyqtSignal(object)
 
     def __init__(self, editorGenerator, targetObject, name, typeHint):
         super().__init__()
@@ -98,9 +98,9 @@ class EditorLinkMap(QWidget):
         self._currentCol += 1
 
     def addMapElem(self):
-        upgrade = self.chooseNewKey()
-        if upgrade:
-            self._getMap()[upgrade] = self.constructValue()
+        newTarget = self.chooseNewKey()
+        if newTarget:
+            self._getMap()[newTarget] = self.constructValue()
             self._dataChanged()
             self.createWidgetsForObject()
 
@@ -110,11 +110,11 @@ class EditorLinkMap(QWidget):
             self._dataChanged()
             self.createWidgetsForObject()
 
-    def replaceMapElem(self, oldUpgrade):
-        newUpgrade = self.chooseNewKey()
-        if newUpgrade and oldUpgrade != newUpgrade:
-            self._getMap()[newUpgrade] = self._getMap()[oldUpgrade]
-            del(self._getMap()[oldUpgrade])
+    def replaceMapElem(self, oldTarget):
+        newTarget = self.chooseNewKey()
+        if newTarget and oldTarget != newTarget:
+            self._getMap()[newTarget] = self._getMap()[oldTarget]
+            del(self._getMap()[oldTarget])
             self._dataChanged()
             self.createWidgetsForObject()
 
@@ -127,11 +127,11 @@ class EditorLinkMap(QWidget):
                 QMessageBox.warning(self, "Invalid Path", os.path.abspath(newPath) + "\n\nis outside the root path\n\n" + os.path.abspath(rootPath))
                 return None
 
-            upgrade = os.path.basename(newPath).replace(".json", "")
-            if upgrade in self._getMap():
-                QMessageBox.warning(self, "Already have " + upgrade + "!")
+            newTarget = os.path.basename(newPath).replace(".json", "")
+            if newTarget in self._getMap():
+                QMessageBox.warning(self, "Already have " + newTarget + "!")
                 return None
-            return upgrade
+            return newTarget
 
         return None
 
