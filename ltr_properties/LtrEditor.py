@@ -214,6 +214,7 @@ class LtrEditor(QWidget):
             del self._tabInfo[index]
 
     def openFile(self, name, path, dataChangeCallback=None):
+        path = path.replace('\\', '/')
         obj = None
 
         foundIndex = -1

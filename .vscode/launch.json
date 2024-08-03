@@ -4,9 +4,10 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+    
         {
             "name": "Sample Editor",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/example/main.py",
             "console": "integratedTerminal",
@@ -14,11 +15,20 @@
         },
         {
             "name": "Eternity TD Editor",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}../../eternity_td_cpp/TowerDefenseEditor/main.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}../../eternity_td_cpp"
+        },
+        {
+            "name": "Tanzer Editor",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}../../tanzer/SimulateGlfw.py",
+            "args": ["editor"],
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}../../tanzer"
         },
     ]
 }
