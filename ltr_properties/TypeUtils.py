@@ -59,6 +59,8 @@ def instantiateTypeHint(typeHint):
         return None
     elif issubclass(typeHint, Enum):
         return list(typeHint)[0]
+    elif "default" in typeHint.__dict__:
+        return typeHint.default()
     else:
         return typeHint()
 

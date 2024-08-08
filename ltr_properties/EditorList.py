@@ -30,7 +30,10 @@ class EditorList(CompoundEditor):
         with self._editorGenerator.threadLock():
             if self._typeHint:
                 elemHint = getListElemTypeHint(self._typeHint)
-                self._targetObject.append(elemHint())
+                if "default" in elemHint.__dict__:
+                    self._targetObject.append(elemHint.default())
+                else:
+                    self._targetObject.append(elemHint())
             else:
                 self._targetObject.append(copy.deepcopy(self._targetObject[0]))
             self._createWidgetsForObject()
