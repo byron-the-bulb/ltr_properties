@@ -1,5 +1,6 @@
 from .Names import Names
 from typing import TypeVar, Generic
+import copy
 
 T = TypeVar("T")
 
@@ -20,6 +21,15 @@ class Link(Generic[T]):
 
     def hasObject(self):
         return self._object != None
+    
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls()
+        memo[id(self)] = result
+        result.filename = self.filename
+        if self._object:
+            result._object = copy.deepcopy(self._object, memo)
+        return result
 
     def __getattr__(self, name):
         if not name in Link.__slots__ and self._object:
