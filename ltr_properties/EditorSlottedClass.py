@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import QComboBox
+from PyQt5.QtCore import Qt, QEvent
 
 from .CompoundEditor import CompoundEditor
 from .TypeUtils import getAllSlots, getEditablePropertiesSlottedObject
@@ -6,13 +7,24 @@ from enum import Enum
 
 import typing
 
+class ClassSelector(QComboBox):
+    def __init__(self):
+        super().__init__()        
+        self.setFocusPolicy(Qt.StrongFocus)
+        self.installEventFilter(self)
+            
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.Wheel:
+            return True
+        return False
+
 class EditorSlottedClass(CompoundEditor):
     def _getProperties(self):
         return getEditablePropertiesSlottedObject(self._targetObject)
 
     def _getHeaderWidgets(self):
         if self._typeHint and len(self._typeHint.__subclasses__()) > 0:
-            classSelector = QComboBox()
+            classSelector = ClassSelector()
             for classType in self._getSelectableClasses(self._typeHint):
                 classSelector.addItem(classType.__name__)
 
