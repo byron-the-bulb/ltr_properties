@@ -100,12 +100,30 @@ def _isModuleOrClassFromRootFolder(obj, moduleRootFolders):
     return False
 
 def basicTypeMatches(value, typeHint):
-    if isinstance(value, typeHint):
+    # Check if the type hint is a generic (e.g., MCPLink[Palette])
+    if isinstance(typeHint, typing._GenericAlias):
+        # Get the base class (e.g., MCPLink)
+        origin = typing.get_origin(typeHint)
+        if origin is None:
+            origin = typeHint
+
+        # Check if the value is an instance of the base class
+        if not isinstance(value, origin):
+            return False
+
+        # If there are type parameters (e.g., Palette), validate the linked object
+        type_args = typing.get_args(typeHint)
+        if type_args and hasattr(value, '_object') and value._object is not None:
+            expected_type = type_args[0]  # First type parameter (e.g., Palette)
+            return isinstance(value._object, expected_type)
+        return True
+
+    # Handle non-generic types (existing logic)
+    elif isinstance(value, typeHint):
         return True
     elif typeHint == float and isinstance(value, int):
         return True
-    elif issubclass(typeHint, Enum) and isinstance(value, str):
-        return True
+    # Add any other special cases from your original function
     return False
 
 def checkType(value, typeHint, path):

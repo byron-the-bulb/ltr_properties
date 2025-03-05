@@ -77,6 +77,12 @@ class Serializer():
         if filename in self._loadedObjects:
             self.save(filename, self._loadedObjects[filename])
 
+    def clearCachedObject(self, filename):
+        if filename in self._loadedObjects:
+            del self._loadedObjects[filename]
+            return True
+        return False
+
     class __Encoder(json.JSONEncoder):
         def default(self, o):
             slots = TypeUtils.getAllSlots(o)
@@ -122,14 +128,41 @@ class Serializer():
                     if not hasattr(classObj, k):
                         setattr(classObj, k, TypeUtils.instantiateTypeHint(v))
 
-                if Names.serializer in classType.__slots__:
+                # Check all base classes for the serializer slot
+                if any(Names.serializer in cls.__slots__ for cls in classType.mro() if hasattr(cls, '__slots__')):
                     setattr(classObj, Names.serializer, self)
+
                 if hasattr(classObj, Names.postLoadMethod):
                     getattr(classObj, Names.postLoadMethod)()
 
                 return classObj
-        
+
         return jsonObject
+
+#        def _decodeObjectHook(self, jsonObject):
+#            if len(jsonObject) == 1:
+##                className = next(iter(jsonObject.keys()))
+#                if className in self._classDict:
+#            classType = self._classDict[className]
+#             typeHints = typing.get_type_hints(classType)
+#            classObj = classType()
+#            for k, v in jsonObject[className].items():
+#                if k in typeHints:
+#                    TypeUtils.checkType(v, typeHints[k], className + '.' + k)
+#                    self._setattrOnObj(classObj, k, v, typeHints)
+#
+#                for k, v in typeHints.items():
+##                    if not hasattr(classObj, k):
+#                        setattr(classObj, k, TypeUtils.instantiateTypeHint(v))
+#
+#                if Names.serializer in classType.__slots__:
+#                    setattr(classObj, Names.serializer, self)
+#                if hasattr(classObj, Names.postLoadMethod):
+#                    getattr(classObj, Names.postLoadMethod)()
+#
+#                return classObj
+#        
+#        return jsonObject
 
     def _setattrOnObj(self, classObj, k, v, typeHints):
         doDefaultSet = True
