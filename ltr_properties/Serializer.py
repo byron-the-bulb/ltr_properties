@@ -9,7 +9,7 @@ from enum import Enum
 from . import TypeUtils
 from .Names import Names
 
-from PyQt5.QtWidgets import QMessageBox
+#from PyQt5.QtWidgets import QMessageBox
 
 class Serializer():
     def __init__(self, root, classDict, indent=None, widgetParent=None):
@@ -56,8 +56,8 @@ class Serializer():
                 with open(path, 'r') as loadFile:
                     result = self.decode(loadFile.read())
                     self._loadedObjects[filename] = result
-            elif self._widgetParent:
-                QMessageBox.warning(self._widgetParent, "Link to missing object", "Cannot find object at path:\n" + path)
+            #elif self._widgetParent:
+                #QMessageBox.warning(self._widgetParent, "Link to missing object", "Cannot find object at path:\n" + path)
                 
         return result, self._loadStack.pop()
 
@@ -82,6 +82,9 @@ class Serializer():
             del self._loadedObjects[filename]
             return True
         return False
+
+    def getAllLoadedObjectsFilenames(self):
+        return list(self._loadedObjects.keys())
 
     class __Encoder(json.JSONEncoder):
         def default(self, o):
@@ -187,5 +190,6 @@ class Serializer():
             try:
                 setattr(classObj, k, v)
             except:
-                if self._widgetParent:
-                    QMessageBox.warning(self._widgetParent, "Failed to set property from json data", "Could not find type for: " + k)
+                pass
+                #if self._widgetParent:
+                    #QMessageBox.warning(self._widgetParent, "Failed to set property from json data", "Could not find type for: " + k)

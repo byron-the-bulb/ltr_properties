@@ -1,12 +1,12 @@
 """ltr_properties - A Qt-based property editor framework"""
-
-from .LtrEditor import LtrEditor
+#
+#from .LtrEditor import LtrEditor
 from .Serializer import Serializer
-from .PropertyEditorWidget import PropertyEditorWidget
-from .ObjectTree import ObjectTree
-from .EditorColor import EditorColor
-from .EditorLinkMap import EditorLinkMap
-from .EditorSlottedClass import EditorSlottedClassHorizontal
+#from .PropertyEditorWidget import PropertyEditorWidget
+#from .ObjectTree import ObjectTree
+#from .EditorColor import EditorColor
+#from .EditorLinkMap import EditorLinkMap
+#from .EditorSlottedClass import EditorSlottedClassHorizontal
 from .Link import Link
 from .UIUtils import clearLayout
 from .TypeUtils import getDictKVTypeHints, getLinkTypeHint, getListElemTypeHint
